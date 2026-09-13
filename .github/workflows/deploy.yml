@@ -42,13 +42,15 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
 
+      - name: Package frontend
+        run: tar -czf frontend-release.tar.gz -C dist .
+
       - name: Upload frontend
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
         run: |
-          ssh "$VPS_USER@$VPS_HOST" "rm -rf ~/frontend-release"
-          scp -r dist "$VPS_USER@$VPS_HOST:~/frontend-release"
+          scp frontend-release.tar.gz "$VPS_USER@$VPS_HOST:~/frontend-release.tar.gz"
 
       - name: Publish frontend
         env:
@@ -57,8 +59,16 @@ jobs:
         run: |
           ssh "$VPS_USER@$VPS_HOST" '
             set -e
+
+            rm -rf ~/frontend-release
+            mkdir -p ~/frontend-release
+
+            tar -xzf ~/frontend-release.tar.gz -C ~/frontend-release
+            rm -f ~/frontend-release.tar.gz
+
             rm -rf /var/www/mazikox/*
             cp -a ~/frontend-release/. /var/www/mazikox/
             chmod -R a+rX /var/www/mazikox
+
             rm -rf ~/frontend-release
           '
