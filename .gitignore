@@ -19,3 +19,8 @@ coverage/
 Thumbs.db
 .idea/
 .vscode/
+
+# Agent skills and configurations
+.agents/
+skills/
+skills-lock.json
