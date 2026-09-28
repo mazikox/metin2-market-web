@@ -1,9 +1,17 @@
 import { GAME_SERVERS, getServerUrl } from '../servers'
 import type { GameServerId } from '../servers'
 
-interface HeaderProps { isLive: boolean; currentServer: GameServerId }
+export type ApiStatus = 'checking' | 'online' | 'offline'
 
-export function Header({ isLive, currentServer }: HeaderProps) {
+interface HeaderProps { apiStatus: ApiStatus; currentServer: GameServerId }
+
+export function Header({ apiStatus, currentServer }: HeaderProps) {
+  const statusText = apiStatus === 'checking'
+    ? 'Łączenie z API…'
+    : apiStatus === 'online' ? 'API online' : 'API niedostępne'
+  const statusClass = apiStatus === 'checking'
+    ? 'status-dot--checking'
+    : apiStatus === 'offline' ? 'status-dot--offline' : ''
   return (
     <header className="site-header">
       <div className="shell topbar">
@@ -21,8 +29,8 @@ export function Header({ isLive, currentServer }: HeaderProps) {
           <a href="#market" className="active">Rynek</a><a href="#catalog">Przedmioty</a><a href="#about">O danych</a>
         </nav>
         <div className="status-badge" aria-live="polite">
-          <i className={'status-dot ' + (isLive ? '' : 'status-dot--demo')} aria-hidden="true" />
-          <span>{isLive ? 'API online' : 'Tryb demonstracyjny'}</span>
+          <i className={'status-dot ' + statusClass} aria-hidden="true" />
+          <span>{statusText}</span>
         </div>
       </div>
     </header>

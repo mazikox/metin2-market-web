@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { serverApis } from './api'
+import { ApiError, serverApis } from './api'
 import type { ItemSuggestion, MarketOffer } from './types'
-import { mockItems, mockSuggestions } from './mockData'
-import { Header } from './components/Header'
+import { Header, type ApiStatus } from './components/Header'
 import { Hero } from './components/Hero'
 import { SearchSection } from './components/SearchSection'
 import { ListingItem } from './components/ListingItem'
@@ -10,7 +9,6 @@ import { MarketAside, type AggregatedStats } from './components/MarketAside'
 import { Manifesto } from './components/Manifesto'
 import { Footer } from './components/Footer'
 import { ItemDrawer } from './components/ItemDrawer'
-import { Toast } from './components/Toast'
 import { shortMap } from './format'
 import { getSelectedServer } from './servers'
 
@@ -19,50 +17,39 @@ const PAGE_SIZE = 8
 export default function App() {
   const server = getSelectedServer()
   const api = serverApis[server.id]
-  const [isLive, setIsLive] = useState<boolean>(true)
-  const [query, setQuery] = useState(server.id === 'pandora' ? 'Zatruty miecz' : '')
+  const initialQuery = server.id === 'pandora' ? 'Zatruty miecz' : ''
+  const [apiStatus, setApiStatus] = useState<ApiStatus>('checking')
+  const [query, setQuery] = useState(initialQuery)
+  const [inputQuery, setInputQuery] = useState(initialQuery)
   const [vnums, setVnums] = useState<number[]>(server.id === 'pandora' ? [180, 181, 182, 183, 184, 185, 186, 187, 188, 189] : [])
-  const [activeSuggestion, setActiveSuggestion] = useState<ItemSuggestion | null>(server.id === 'pandora' ? mockSuggestions[0] : null)
+  const [activeSuggestion, setActiveSuggestion] = useState<ItemSuggestion | null>(null)
   const [page, setPage] = useState(0)
   const [sort, setSort] = useState<'api' | 'priceDesc' | 'quantity'>('api')
   const [mapFilter, setMapFilter] = useState('')
   const [rawItems, setRawItems] = useState<MarketOffer[]>([])
   const [totalElements, setTotalElements] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [marketError, setMarketError] = useState<string | null>(null)
+  const [retryVersion, setRetryVersion] = useState(0)
   const [stats, setStats] = useState<AggregatedStats | null>(null)
-  const [suggestions, setSuggestions] = useState<ItemSuggestion[]>(server.id === 'pandora' ? mockSuggestions : [])
+  const [suggestions, setSuggestions] = useState<ItemSuggestion[]>([])
   const [activeDrawerItem, setActiveDrawerItem] = useState<MarketOffer | null>(null)
-  const [toastMessage, setToastMessage] = useState<string | null>(null)
 
-  const toastTimerRef = useRef<number | null>(null)
   const suggestTimerRef = useRef<number | null>(null)
-
-  const showToast = useCallback((msg: string) => {
-    setToastMessage(msg)
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
-    toastTimerRef.current = window.setTimeout(() => setToastMessage(null), 3000)
-  }, [])
+  const suggestionControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     document.title = 'Metin Market — ' + server.name
   }, [server.name])
 
-  // Probe API connection on startup
   useEffect(() => {
-    let active = true
-    api.probe(1500).then((live) => {
-      if (!active) return
-      setIsLive(live)
-      if (!live) {
-        showToast('API niedostępne — pokazuję dane demonstracyjne.')
-      }
-    })
     return () => {
-      active = false
+      if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
+      suggestionControllerRef.current?.abort()
     }
-  }, [showToast])
+  }, [])
 
-  // Compute local fallback statistics
+  // Compute local statistics when the statistics endpoint is unavailable.
   const computeLocalStats = useCallback((items: MarketOffer[]): AggregatedStats | null => {
     const prices = items
       .map((i) => Number(i.unitPrice))
@@ -83,47 +70,40 @@ export default function App() {
     }
   }, [])
 
-  // Load items
-  const loadData = useCallback(async (currentQuery: string, currentVnums: number[], currentPage: number) => {
+  // Use the actual offers request as the source of API status.
+  const loadData = useCallback(async (
+    currentQuery: string,
+    currentVnums: number[],
+    currentPage: number,
+    signal: AbortSignal,
+  ) => {
     setLoading(true)
+    setRawItems([])
+    setTotalElements(0)
+    setStats(null)
     try {
-      let data: { items: MarketOffer[]; totalElements: number }
-
-      try {
-        data = await api.offers({
-          query: currentQuery,
-          vnums: currentVnums,
-          page: currentPage,
-          size: PAGE_SIZE,
-        })
-        setIsLive(true)
-      } catch {
-        setIsLive(false)
-        const q = currentQuery.toLocaleLowerCase('pl').trim()
-        let filtered = server.id === 'pandora' ? mockItems.filter(
-          (i) => !q || i.itemName.toLocaleLowerCase('pl').includes(q)
-        ) : []
-        if (currentVnums.length > 0) {
-          filtered = filtered.filter((i) => currentVnums.includes(i.vnum))
-        }
-        data = {
-          items: filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE),
-          totalElements: filtered.length,
-        }
-      }
+      const data = await api.offers({
+        query: currentQuery,
+        vnums: currentVnums,
+        page: currentPage,
+        size: PAGE_SIZE,
+      }, signal)
+      if (signal.aborted) return
 
       const items = data.items || []
+      setApiStatus('online')
+      setMarketError(null)
       setRawItems(items)
       setTotalElements(data.totalElements ?? items.length)
 
-      // Fetch or compute statistics
       const statsVnums = currentVnums.length > 0
         ? currentVnums
         : [...new Set(items.map((i) => i.vnum))].slice(0, 100)
 
       if (statsVnums.length > 0) {
         try {
-          const statsData = await api.statistics(statsVnums)
+          const statsData = await api.statistics(statsVnums, signal)
+          if (signal.aborted) return
           const rows = statsData.items || []
           if (rows.length === 1) {
             const r = rows[0]
@@ -149,47 +129,60 @@ export default function App() {
             setStats(computeLocalStats(items))
           }
         } catch {
+          if (signal.aborted) return
           setStats(computeLocalStats(items))
         }
       } else {
         setStats(computeLocalStats(items))
       }
+    } catch (error) {
+      if (signal.aborted) return
+      setApiStatus('offline')
+      setMarketError(error instanceof ApiError
+        ? error.message
+        : 'Nie udało się pobrać ofert. Spróbuj ponownie.')
+      setRawItems([])
+      setTotalElements(0)
+      setStats(null)
     } finally {
-      setLoading(false)
+      if (!signal.aborted) setLoading(false)
     }
-  }, [computeLocalStats])
+  }, [api, computeLocalStats])
 
   useEffect(() => {
-    loadData(query, vnums, page)
-  }, [query, vnums, page, loadData])
+    const controller = new AbortController()
+    void loadData(query, vnums, page, controller.signal)
+    return () => controller.abort()
+  }, [query, vnums, page, loadData, retryVersion])
 
-  // Fetch suggestions
+  // Load server suggestions without reusing stale responses or demo data.
   const handleQueryChange = (val: string) => {
-    setQuery(val)
+    setInputQuery(val)
     if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
+    suggestionControllerRef.current?.abort()
 
     if (!val.trim()) {
       setSuggestions([])
       return
     }
 
+    const controller = new AbortController()
+    suggestionControllerRef.current = controller
     suggestTimerRef.current = window.setTimeout(async () => {
       try {
-        const res = await api.suggestions(val.trim())
-        if (res.suggestions && res.suggestions.length > 0) {
-          setSuggestions(res.suggestions)
-          return
-        }
+        const res = await api.suggestions(val.trim(), controller.signal)
+        if (!controller.signal.aborted) setSuggestions(res.suggestions || [])
       } catch {
-        // fallback to mock suggestions
+        if (!controller.signal.aborted) setSuggestions([])
       }
-      const lq = val.toLocaleLowerCase('pl')
-      const local = server.id === 'pandora' ? mockSuggestions.filter((s) => s.name.toLocaleLowerCase('pl').includes(lq)) : []
-      setSuggestions(local)
     }, 220)
   }
 
   const handleSearchSubmit = (newQuery: string) => {
+    if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
+    suggestionControllerRef.current?.abort()
+    setSuggestions([])
+    setInputQuery(newQuery)
     setQuery(newQuery)
     setVnums([])
     setActiveSuggestion(null)
@@ -197,8 +190,12 @@ export default function App() {
   }
 
   const handleSelectSuggestion = (s: ItemSuggestion) => {
+    if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
+    suggestionControllerRef.current?.abort()
+    setSuggestions([])
     setActiveSuggestion(s)
     const normalizedName = s.kind === 'UPGRADE_FAMILY' ? s.name.replace(/\s\+0-9$/, '') : s.name
+    setInputQuery(normalizedName)
     setQuery(normalizedName)
     setVnums(s.kind === 'UPGRADE_FAMILY' ? s.memberVnums || [] : s.vnum != null ? [s.vnum] : [])
     setPage(0)
@@ -227,13 +224,13 @@ export default function App() {
 
   return (
     <>
-      <Header isLive={isLive} currentServer={server.id} />
+      <Header apiStatus={apiStatus} currentServer={server.id} />
 
       <main>
         <Hero serverName={server.name} />
 
         <SearchSection
-          query={query}
+          query={inputQuery}
           suggestions={suggestions}
           onSearch={handleSearchSubmit}
           onSelectSuggestion={handleSelectSuggestion}
@@ -285,7 +282,19 @@ export default function App() {
                 <div className="count">{totalElements} wyników</div>
               </div>
 
-              {displayedItems.length > 0 ? (
+              {marketError ? (
+                <div className="empty api-error" role="alert">
+                  <p>{marketError}</p>
+                  <button
+                    type="button"
+                    className="api-retry"
+                    onClick={() => setRetryVersion((version) => version + 1)}
+                    disabled={loading}
+                  >
+                    {loading ? 'Łączenie…' : 'Spróbuj ponownie'}
+                  </button>
+                </div>
+              ) : displayedItems.length > 0 ? (
                 displayedItems.map((item) => (
                   <ListingItem
                     key={`${item.listingId}-${item.vnum}`}
@@ -344,7 +353,6 @@ export default function App() {
         onClose={() => setActiveDrawerItem(null)}
       />
 
-      <Toast message={toastMessage} />
     </>
   )
 }

@@ -28,9 +28,6 @@ function createServerApi(server: GameServerId) {
   const itemsPath = '/api/v1/servers/' + server + '/items'
   return {
     baseUrl: API_BASE_URL,
-    async probe(timeoutMs = 1800): Promise<boolean> {
-      try { await request<OffersResponse>(itemsPath + '?query=&page=0&size=1', undefined, timeoutMs); return true } catch { return false }
-    },
     suggestions(query: string, signal?: AbortSignal) {
       const params = new URLSearchParams({ query: query.trim() })
       return request<SuggestionsResponse>(itemsPath + '/suggestions?' + params, signal, 4000)

@@ -192,9 +192,14 @@ nav.main-nav a.active::after {
   transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 
-.status-dot--demo {
+.status-dot--offline {
   background: var(--amber);
   box-shadow: 0 0 0 4px rgba(141, 106, 56, 0.14);
+}
+
+.status-dot--checking {
+  background: var(--muted);
+  box-shadow: 0 0 0 4px rgba(142, 141, 136, 0.14);
 }
 
 /* ==================== HERO ==================== */
@@ -674,6 +679,27 @@ select.custom-select option {
   color: var(--muted);
   text-align: center;
   font-size: 15px;
+}
+
+.api-error p {
+  margin: 0 0 16px;
+}
+
+.api-retry {
+  padding: 10px 16px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink);
+}
+
+.api-retry:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.api-retry:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 /* Pagination */
