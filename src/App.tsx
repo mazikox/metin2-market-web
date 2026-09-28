@@ -13,6 +13,7 @@ import { shortMap } from './format'
 import { getSelectedServer } from './servers'
 
 const PAGE_SIZE = 8
+type ActiveSection = 'market' | 'catalog' | 'about' | null
 
 export default function App() {
   const server = getSelectedServer()
@@ -34,6 +35,7 @@ export default function App() {
   const [stats, setStats] = useState<AggregatedStats | null>(null)
   const [suggestions, setSuggestions] = useState<ItemSuggestion[]>([])
   const [activeDrawerItem, setActiveDrawerItem] = useState<MarketOffer | null>(null)
+  const [activeSection, setActiveSection] = useState<ActiveSection>(null)
 
   const suggestTimerRef = useRef<number | null>(null)
   const suggestionControllerRef = useRef<AbortController | null>(null)
@@ -41,6 +43,36 @@ export default function App() {
   useEffect(() => {
     document.title = 'Metin Market — ' + server.name
   }, [server.name])
+
+  useEffect(() => {
+    let frame = 0
+    const updateActiveSection = () => {
+      frame = 0
+      const maxScrollY = document.documentElement.scrollHeight - window.innerHeight
+      const reachedAnchor = (id: string) => {
+        const anchor = document.getElementById(id)
+        if (!anchor) return false
+        const margin = Number.parseFloat(getComputedStyle(anchor).scrollMarginTop) || 0
+        const targetScrollY = Math.min(maxScrollY, anchor.getBoundingClientRect().top + window.scrollY - margin)
+        return window.scrollY > 0 && window.scrollY >= targetScrollY - 1
+      }
+      const atBottom = window.scrollY > 0 && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2
+
+      setActiveSection(atBottom || reachedAnchor('about') ? 'about' : reachedAnchor('catalog') ? 'catalog' : reachedAnchor('market') ? 'market' : null)
+    }
+    const scheduleUpdate = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateActiveSection)
+    }
+
+    updateActiveSection()
+    window.addEventListener('scroll', scheduleUpdate, { passive: true })
+    window.addEventListener('resize', scheduleUpdate)
+    return () => {
+      window.removeEventListener('scroll', scheduleUpdate)
+      window.removeEventListener('resize', scheduleUpdate)
+      if (frame) window.cancelAnimationFrame(frame)
+    }
+  }, [])
 
   useEffect(() => {
     return () => {
@@ -224,7 +256,7 @@ export default function App() {
 
   return (
     <>
-      <Header apiStatus={apiStatus} currentServer={server.id} />
+      <Header apiStatus={apiStatus} currentServer={server.id} activeSection={activeSection} />
 
       <main>
         <Hero serverName={server.name} />
@@ -237,7 +269,7 @@ export default function App() {
           onQueryChange={handleQueryChange}
         />
 
-        <section className="shell" id="market">
+        <section className="shell" id="catalog">
           <div className="section-head">
             <h2 className="section-title">
               Oferty / <span>{query || 'ostatni skan'}</span>

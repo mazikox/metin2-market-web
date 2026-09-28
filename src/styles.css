@@ -252,6 +252,15 @@ h1.hero-title {
   position: relative;
 }
 
+#market {
+  scroll-margin-top: 85px;
+}
+
+#catalog,
+#about {
+  scroll-margin-top: 77px;
+}
+
 .search-input-wrap {
   position: relative;
   display: flex;
@@ -1047,6 +1056,13 @@ footer.site-footer {
 @media (max-width: 680px) {
   .topbar {
     min-height: 62px;
+  }
+  #market {
+    scroll-margin-top: 71px;
+  }
+  #catalog,
+  #about {
+    scroll-margin-top: 63px;
   }
   .status-badge span,
   .server-switcher > span {

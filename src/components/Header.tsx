@@ -3,9 +3,13 @@ import type { GameServerId } from '../servers'
 
 export type ApiStatus = 'checking' | 'online' | 'offline'
 
-interface HeaderProps { apiStatus: ApiStatus; currentServer: GameServerId }
+interface HeaderProps {
+  apiStatus: ApiStatus
+  currentServer: GameServerId
+  activeSection: 'market' | 'catalog' | 'about' | null
+}
 
-export function Header({ apiStatus, currentServer }: HeaderProps) {
+export function Header({ apiStatus, currentServer, activeSection }: HeaderProps) {
   const statusText = apiStatus === 'checking'
     ? 'Łączenie z API…'
     : apiStatus === 'online' ? 'API online' : 'API niedostępne'
@@ -26,7 +30,9 @@ export function Header({ apiStatus, currentServer }: HeaderProps) {
           </select>
         </label>
         <nav className="main-nav" aria-label="Główna nawigacja">
-          <a href="#market" className="active">Rynek</a><a href="#catalog">Przedmioty</a><a href="#about">O danych</a>
+          <a href="#market" className={activeSection === 'market' ? 'active' : undefined} aria-current={activeSection === 'market' ? 'location' : undefined}>Rynek</a>
+          <a href="#catalog" className={activeSection === 'catalog' ? 'active' : undefined} aria-current={activeSection === 'catalog' ? 'location' : undefined}>Przedmioty</a>
+          <a href="#about" className={activeSection === 'about' ? 'active' : undefined} aria-current={activeSection === 'about' ? 'location' : undefined}>O danych</a>
         </nav>
         <div className="status-badge" aria-live="polite">
           <i className={'status-dot ' + statusClass} aria-hidden="true" />

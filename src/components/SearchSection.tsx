@@ -66,9 +66,9 @@ export function SearchSection({
   }
 
   return (
-    <section className="search-section" id="catalog">
+    <section className="search-section">
       <div className="shell search-wrap" ref={wrapRef}>
-        <form className="search-panel" onSubmit={handleSubmit} autoComplete="off">
+        <form className="search-panel" id="market" onSubmit={handleSubmit} autoComplete="off">
           <div className="search-input-wrap">
             <input
               id="searchInput"
