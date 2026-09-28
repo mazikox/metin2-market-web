@@ -46,3 +46,8 @@ Osadzone Kamienie Duszy rozpoznaje `src/soulStones.ts`. Wartości socketów
 `28630–28643` są pokazywane nazwą i poziomem +5, a odpowiadające im grafiki
 pochodzą z serii ikon `28000–28013`. Pozostałe wartości pozostają wyłącznie
 w rozwijanych danych technicznych slotów.
+
+
+## Serwery
+
+Widok Pandory jest dostępny pod adresem głównym. Elder i Beavium mają osobne adresy widoków: ?server=elder oraz ?server=beavium. Każdy widok pobiera oferty, podpowiedzi i statystyki z tras /api/v1/servers/{serwer}/items. Selektor serwera zachowuje pozostałe parametry adresu, w tym opcjonalne api używane lokalnie.

@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { api } from '../api'
+import { serverApis } from '../api'
 import type { ItemSuggestion } from '../types'
+import { getSelectedServer } from '../servers'
 import { CloseIcon, SearchIcon } from './Icons'
 import { ItemIcon } from './ItemIcon'
 
@@ -18,6 +19,7 @@ function HighlightMatch({ name, query }: { name: string; query: string }) {
 }
 
 export function SearchBox({ selected, onSelect, onClear }: SearchBoxProps) {
+  const api = serverApis[getSelectedServer().id]
   const [query, setQuery] = useState(selected?.name ?? '')
   const [suggestions, setSuggestions] = useState<ItemSuggestion[]>([])
   const [totalMatches, setTotalMatches] = useState(0)

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { api } from './api'
+import { serverApis } from './api'
 import type { ItemSuggestion, MarketOffer } from './types'
 import { mockItems, mockSuggestions } from './mockData'
 import { Header } from './components/Header'
@@ -12,14 +12,17 @@ import { Footer } from './components/Footer'
 import { ItemDrawer } from './components/ItemDrawer'
 import { Toast } from './components/Toast'
 import { shortMap } from './format'
+import { getSelectedServer } from './servers'
 
 const PAGE_SIZE = 8
 
 export default function App() {
+  const server = getSelectedServer()
+  const api = serverApis[server.id]
   const [isLive, setIsLive] = useState<boolean>(true)
-  const [query, setQuery] = useState('Zatruty miecz')
-  const [vnums, setVnums] = useState<number[]>([180, 181, 182, 183, 184, 185, 186, 187, 188, 189])
-  const [activeSuggestion, setActiveSuggestion] = useState<ItemSuggestion | null>(mockSuggestions[0])
+  const [query, setQuery] = useState(server.id === 'pandora' ? 'Zatruty miecz' : '')
+  const [vnums, setVnums] = useState<number[]>(server.id === 'pandora' ? [180, 181, 182, 183, 184, 185, 186, 187, 188, 189] : [])
+  const [activeSuggestion, setActiveSuggestion] = useState<ItemSuggestion | null>(server.id === 'pandora' ? mockSuggestions[0] : null)
   const [page, setPage] = useState(0)
   const [sort, setSort] = useState<'api' | 'priceDesc' | 'quantity'>('api')
   const [mapFilter, setMapFilter] = useState('')
@@ -27,7 +30,7 @@ export default function App() {
   const [totalElements, setTotalElements] = useState(0)
   const [loading, setLoading] = useState(false)
   const [stats, setStats] = useState<AggregatedStats | null>(null)
-  const [suggestions, setSuggestions] = useState<ItemSuggestion[]>(mockSuggestions)
+  const [suggestions, setSuggestions] = useState<ItemSuggestion[]>(server.id === 'pandora' ? mockSuggestions : [])
   const [activeDrawerItem, setActiveDrawerItem] = useState<MarketOffer | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
@@ -39,6 +42,10 @@ export default function App() {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
     toastTimerRef.current = window.setTimeout(() => setToastMessage(null), 3000)
   }, [])
+
+  useEffect(() => {
+    document.title = 'Metin Market — ' + server.name
+  }, [server.name])
 
   // Probe API connection on startup
   useEffect(() => {
@@ -93,9 +100,9 @@ export default function App() {
       } catch {
         setIsLive(false)
         const q = currentQuery.toLocaleLowerCase('pl').trim()
-        let filtered = mockItems.filter(
+        let filtered = server.id === 'pandora' ? mockItems.filter(
           (i) => !q || i.itemName.toLocaleLowerCase('pl').includes(q)
-        )
+        ) : []
         if (currentVnums.length > 0) {
           filtered = filtered.filter((i) => currentVnums.includes(i.vnum))
         }
@@ -177,7 +184,7 @@ export default function App() {
         // fallback to mock suggestions
       }
       const lq = val.toLocaleLowerCase('pl')
-      const local = mockSuggestions.filter((s) => s.name.toLocaleLowerCase('pl').includes(lq))
+      const local = server.id === 'pandora' ? mockSuggestions.filter((s) => s.name.toLocaleLowerCase('pl').includes(lq)) : []
       setSuggestions(local)
     }, 220)
   }
@@ -220,10 +227,10 @@ export default function App() {
 
   return (
     <>
-      <Header isLive={isLive} />
+      <Header isLive={isLive} currentServer={server.id} />
 
       <main>
-        <Hero />
+        <Hero serverName={server.name} />
 
         <SearchSection
           query={query}
