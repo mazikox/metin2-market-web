@@ -332,9 +332,28 @@ h1.hero-title {
     color: var(--accent);
   }
 
+  .favorite-entry__remove {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease, color 150ms ease;
+  }
+
+  .favorite-entry:hover .favorite-entry__remove,
+  .favorite-entry:focus-within .favorite-entry__remove {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .favorite-entry__remove:hover {
     color: var(--ink);
+  }
+
+  .favorite-entry__remove:hover::before {
     background: var(--paper-3);
+  }
+
+  .favorite-entry__search:hover span {
+    border-color: var(--accent);
   }
 }
 
@@ -433,6 +452,17 @@ h1.hero-title {
   border-color: var(--accent);
 }
 
+.quick-btn--active,
+.quick-btn--active:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.quick-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .favorites-row {
   display: flex;
   flex-wrap: wrap;
@@ -450,9 +480,9 @@ h1.hero-title {
 .favorite-entry {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   min-width: 0;
   max-width: 100%;
-  border-bottom: 1px solid var(--line-strong);
 }
 
 .favorite-entry__search {
@@ -460,7 +490,7 @@ h1.hero-title {
   align-items: center;
   min-width: 0;
   min-height: 36px;
-  padding: 0 4px 0 0;
+  padding: 0;
   border: 0;
   background: transparent;
   color: var(--ink-dim);
@@ -468,10 +498,12 @@ h1.hero-title {
 }
 
 .favorite-entry__search span {
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--line-strong);
   overflow-wrap: anywhere;
 }
 
-.favorite-entry--active {
+.favorite-entry--active .favorite-entry__search span {
   border-color: var(--accent);
 }
 
@@ -480,6 +512,7 @@ h1.hero-title {
 }
 
 .favorite-entry__remove {
+  position: relative;
   display: grid;
   place-items: center;
   flex: 0 0 36px;
@@ -492,7 +525,18 @@ h1.hero-title {
   color: var(--muted);
 }
 
+.favorite-entry__remove::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 4px;
+  background: transparent;
+  pointer-events: none;
+  transition: background-color 150ms ease;
+}
+
 .favorite-entry__remove svg {
+  position: relative;
   width: 14px;
   height: 14px;
 }

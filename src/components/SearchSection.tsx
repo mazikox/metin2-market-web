@@ -147,7 +147,8 @@ export function SearchSection({
             <button
               key={item.label}
               type="button"
-              className="quick-btn"
+              className={'quick-btn' + (favoriteQueryKey(item.query) === favoriteQueryKey(query) ? ' quick-btn--active' : '')}
+              aria-pressed={favoriteQueryKey(item.query) === favoriteQueryKey(query)}
               onClick={() => handleQuickClick(item.query)}
             >
               {item.label}
