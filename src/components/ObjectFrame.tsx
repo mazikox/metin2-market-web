@@ -36,9 +36,14 @@ export function ObjectFrame({ vnum, itemName = '', className = 'object-frame' }:
   }
 
   const isDrawer = className.includes('drawer-object')
+  const isFallback = hasError || !imgSrc
 
   return (
-    <div className={className} aria-label={itemName}>
+    <div
+      className={`${className}${isFallback ? ' ' + (isDrawer ? 'drawer-object--fallback' : 'object-frame--fallback') : ''}`}
+      aria-label={itemName}
+      title={isFallback ? `${itemName || 'Przedmiot'} (brak ikony)` : undefined}
+    >
       {!hasError && imgSrc ? (
         <img
           src={imgSrc}
@@ -48,20 +53,23 @@ export function ObjectFrame({ vnum, itemName = '', className = 'object-frame' }:
           loading="lazy"
         />
       ) : (
-        <svg viewBox="0 0 80 120" aria-hidden="true">
-          <path
-            d="M55 8 44 72 36 83 29 76 40 65 55 8Z"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.7"
-          />
-          <path
-            d="m28 74 17 17M22 90l20-20M20 87l-7 17M15 102l8 5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.7"
-          />
-        </svg>
+        <div className="object-fallback" aria-hidden="true">
+          <svg viewBox="0 0 80 120">
+            <path
+              d="M55 8 44 72 36 83 29 76 40 65 55 8Z"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+            />
+            <path
+              d="m28 74 17 17M22 90l20-20M20 87l-7 17M15 102l8 5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+            />
+          </svg>
+          <span className="object-fallback__badge" title="Brak ikony przedmiotu">?</span>
+        </div>
       )}
 
       {edition !== '·' && <span className="edition">+{edition}</span>}
