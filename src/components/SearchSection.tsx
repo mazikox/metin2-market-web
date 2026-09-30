@@ -15,13 +15,36 @@ interface SearchSectionProps {
   onQueryChange: (val: string) => void
 }
 
-const QUICK_SEARCHES = [
+interface QuickSearchItem {
+  label: string
+  query: string
+}
+
+const HARD_SERVER_QUICK_SEARCHES: QuickSearchItem[] = [
+  { label: 'FMS', query: 'Miecz Pełni Księżyca' },
+  { label: 'RIB', query: 'Ostrze z Czerwonej Stali' },
+  { label: 'Zaczarowanie', query: 'Zaczarowanie Przedmiotu' },
+  { label: 'Bodzio', query: 'Zwój Błogosławieństwa' },
+  { label: 'Kamień Duchowy', query: 'Kamień Duchowy' },
+  { label: 'Rada', query: 'Rada Pustelnika' },
+  { label: 'Egzo', query: 'Zwój Egzorcyzmu' },
+  { label: 'Kupon SM 1000', query: 'Kupon SM 1000' },
+  { label: 'Ostatni skan', query: '' },
+]
+
+const PANDORA_QUICK_SEARCHES: QuickSearchItem[] = [
   { label: 'Zatruty miecz', query: 'Zatruty miecz' },
   { label: 'FMS', query: 'FMS' },
   { label: 'Kamień', query: 'Kamień' },
   { label: 'Naszyjnik', query: 'Naszyjnik' },
   { label: 'Ostatni skan', query: '' },
 ]
+
+const QUICK_SEARCHES_BY_SERVER: Record<GameServerId, QuickSearchItem[]> = {
+  pandora: PANDORA_QUICK_SEARCHES,
+  elder: HARD_SERVER_QUICK_SEARCHES,
+  beavium: HARD_SERVER_QUICK_SEARCHES,
+}
 
 export function SearchSection({
   serverId,
@@ -32,6 +55,7 @@ export function SearchSection({
   onSelectSuggestion,
   onQueryChange,
 }: SearchSectionProps) {
+  const quickSearches = QUICK_SEARCHES_BY_SERVER[serverId] ?? HARD_SERVER_QUICK_SEARCHES
   const [open, setOpen] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
   const { favorites, toggleFavorite, removeFavorite, announcement, storageError } = useFavorites(serverId)
@@ -142,8 +166,8 @@ export function SearchSection({
         </form>
 
         <div className="quick-row">
-          <span>Szybki wybór:</span>
-          {QUICK_SEARCHES.map((item) => (
+          <span className="quick-label">Szybki wybór:</span>
+          {quickSearches.map((item) => (
             <button
               key={item.label}
               type="button"

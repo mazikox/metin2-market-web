@@ -439,12 +439,17 @@ h1.hero-title {
   color: var(--muted);
 }
 
+.quick-label {
+  flex-shrink: 0;
+}
+
 .quick-btn {
   border: 0;
   border-bottom: 1px solid var(--line-strong);
   padding: 0 0 2px;
   background: transparent;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 .quick-btn:hover {
@@ -1281,6 +1286,10 @@ footer.site-footer {
     border-top: 1px solid var(--ink);
     min-height: 48px;
     width: 100%;
+  }
+  .quick-row {
+    gap: 8px 14px;
+    padding-top: 12px;
   }
   .suggestions {
     right: 0;
