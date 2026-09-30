@@ -19,6 +19,20 @@ npm run preview
 
 `VITE_API_BASE_URL` wskazuje bazowy adres API. W trybie deweloperskim Vite pośredniczy w zapytaniach, ponieważ publiczne API odrzuca origin `localhost`; build produkcyjny korzysta bezpośrednio ze skonfigurowanego adresu.
 
+## Testy klienta API
+
+`npm test` (Node.js 22 lub nowszy) sprawdza timeout całej odpowiedzi, anulowanie wyszukiwania,
+sprzątanie listenerów, obsługę błędów i ponowne zapytanie po przerwanym pobieraniu.
+Limit czasu obejmuje także odczyt JSON po otrzymaniu nagłówków HTTP.
+Oferty stają się dostępne przed zakończeniem opcjonalnego pobierania statystyk.
+
+Do ręcznej weryfikacji ekranu można uruchomić `node tests/fixtures/market-api.mjs`
+i otworzyć lokalny frontend z `?server=elder&api=http://127.0.0.1:4321`.
+Frazy `stall-body` i `retry-body` symulują zatrzymanie odpowiedzi po statusie 200
+(druga fraza działa po ponowieniu), `slow-statistics` zatrzymuje statystyki,
+a `slow-offers` opóźnia oferty, umożliwiając sprawdzenie szybkiej zmiany wyszukiwania.
+Backend testowy nasłuchuje wyłącznie na lokalnym adresie 127.0.0.1.
+
 ## Struktura
 
 - `src/api.ts` — klient API i obsługa błędów

@@ -110,6 +110,7 @@ export default function App() {
     signal: AbortSignal,
   ) => {
     setLoading(true)
+    setMarketError(null)
     setRawItems([])
     setTotalElements(0)
     setStats(null)
@@ -127,6 +128,9 @@ export default function App() {
       setMarketError(null)
       setRawItems(items)
       setTotalElements(data.totalElements ?? items.length)
+      // Offers are ready to use; optional statistics must not keep the results blocked.
+      setStats(computeLocalStats(items))
+      setLoading(false)
 
       const statsVnums = currentVnums.length > 0
         ? currentVnums
@@ -280,7 +284,7 @@ export default function App() {
           </div>
 
           <div className="market-layout">
-            <div className={`results-pane ${loading ? 'results-pane--loading' : ''}`}>
+            <div className={`results-pane ${loading ? 'results-pane--loading' : ''}`} aria-busy={loading}>
               <div className="toolbar">
                 <div className="filters">
                   <label className="field">
@@ -316,7 +320,9 @@ export default function App() {
                 <div className="count">{totalElements} wyników</div>
               </div>
 
-              {marketError ? (
+              {loading ? (
+                <div className="empty" role="status">Pobieranie ofert…</div>
+              ) : marketError ? (
                 <div className="empty api-error" role="alert">
                   <p>{marketError}</p>
                   <button

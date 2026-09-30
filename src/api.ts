@@ -10,18 +10,42 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, signal?: AbortSignal, timeoutMs = 8000): Promise<T> {
+  if (signal?.aborted) throw signal.reason ?? new DOMException('Request cancelled', 'AbortError')
+
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), timeoutMs)
-  if (signal) signal.addEventListener('abort', () => controller.abort(), { once: true })
-  let response: Response
+  const handleAbort = () => controller.abort(signal?.reason)
+  signal?.addEventListener('abort', handleAbort, { once: true })
+  let timedOut = false
+  const timer = setTimeout(() => {
+    timedOut = true
+    controller.abort()
+  }, timeoutMs)
+
   try {
-    response = await fetch(API_BASE_URL + path, { signal: controller.signal, headers: { Accept: 'application/json' } })
+    const response = await fetch(API_BASE_URL + path, {
+      signal: controller.signal,
+      headers: { Accept: 'application/json' },
+    })
+    if (!response.ok) {
+      throw new ApiError(response.status >= 500
+        ? 'Serwer chwilowo nie odpowiada. Spróbuj ponownie za moment.'
+        : 'Nie udało się pobrać danych.', response.status)
+    }
+    // Receiving HTTP headers does not mean the JSON body has finished downloading.
+    // Keep both the timeout and caller cancellation active until the body is read.
+    const data = await response.json()
+    if (controller.signal.aborted) throw controller.signal.reason
+    return data as T
   } catch (error) {
-    if (signal?.aborted) throw error
+    if (signal?.aborted) throw signal.reason ?? error
+    if (timedOut) throw new ApiError('Serwer nie przesłał pełnej odpowiedzi na czas. Spróbuj ponownie.')
+    if (error instanceof ApiError) throw error
+    if (error instanceof SyntaxError) throw new ApiError('Serwer zwrócił nieprawidłową odpowiedź. Spróbuj ponownie.')
     throw new ApiError('Nie udało się połączyć z serwerem. Sprawdź połączenie i spróbuj ponownie.')
-  } finally { clearTimeout(timer) }
-  if (!response.ok) throw new ApiError(response.status >= 500 ? 'Serwer chwilowo nie odpowiada. Spróbuj ponownie za moment.' : 'Nie udało się pobrać danych.', response.status)
-  return response.json() as Promise<T>
+  } finally {
+    clearTimeout(timer)
+    signal?.removeEventListener('abort', handleAbort)
+  }
 }
 
 function createServerApi(server: GameServerId) {
