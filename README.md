@@ -48,6 +48,14 @@ pochodzą z serii ikon `28000–28013`. Pozostałe wartości pozostają wyłącz
 w rozwijanych danych technicznych slotów.
 
 
+## Ulubione
+
+Gwiazdka po prawej stronie pola wyszukiwania zapisuje lub usuwa wpisaną frazę.
+Zapisane frazy pojawiają się pod „Szybkim wyborem”; kliknięcie uruchamia wyszukiwanie,
+a przycisk × usuwa wpis. Sekcja jest ukryta, gdy lista jest pusta.
+Ulubione są przechowywane w `localStorage` osobno dla każdego serwera i profilu przeglądarki,
+bez konta użytkownika. Dla wybranego przedmiotu lub rodziny zachowywany jest także filtr VNUM.
+
 ## Serwery
 
 Widok Pandory jest dostępny pod adresem głównym. Elder i Beavium mają osobne adresy widoków: ?server=elder oraz ?server=beavium. Każdy widok pobiera oferty, podpowiedzi i statystyki z tras /api/v1/servers/{serwer}/items. Selektor serwera zachowuje pozostałe parametry adresu, w tym opcjonalne api używane lokalnie.

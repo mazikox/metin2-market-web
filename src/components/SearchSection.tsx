@@ -1,8 +1,14 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import type { ItemSuggestion } from '../types'
+import type { GameServerId } from '../servers'
+import { favoriteQueryKey, useFavorites } from '../useFavorites'
+import { Favorites } from './Favorites'
+import { StarIcon } from './Icons'
 
 interface SearchSectionProps {
+  serverId: GameServerId
   query: string
+  queryVnums: number[]
   suggestions: ItemSuggestion[]
   onSearch: (newQuery: string, vnums?: number[]) => void
   onSelectSuggestion: (suggestion: ItemSuggestion) => void
@@ -18,7 +24,9 @@ const QUICK_SEARCHES = [
 ]
 
 export function SearchSection({
+  serverId,
   query,
+  queryVnums,
   suggestions,
   onSearch,
   onSelectSuggestion,
@@ -26,6 +34,9 @@ export function SearchSection({
 }: SearchSectionProps) {
   const [open, setOpen] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
+  const { favorites, toggleFavorite, removeFavorite, announcement, storageError } = useFavorites(serverId)
+  const isFavorite = favorites.some((favorite) => favoriteQueryKey(favorite.query) === favoriteQueryKey(query))
+  const favoriteAction = isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -82,6 +93,22 @@ export function SearchSection({
               aria-label="Nazwa przedmiotu"
             />
 
+            {query.trim() && (
+              <button
+                type="button"
+                className="search-favorite"
+                aria-label={favoriteAction + ': ' + query.trim()}
+                aria-pressed={isFavorite}
+                title={favoriteAction}
+                onClick={() => {
+                  setOpen(false)
+                  toggleFavorite(query, queryVnums)
+                }}
+              >
+                <StarIcon filled={isFavorite} />
+              </button>
+            )}
+
             {open && suggestions.length > 0 && (
               <div className="suggestions" role="listbox" aria-label="Sugestie wyszukiwania">
                 {suggestions.map((s, idx) => (
@@ -127,6 +154,17 @@ export function SearchSection({
             </button>
           ))}
         </div>
+
+        <Favorites
+          favorites={favorites}
+          query={query}
+          onSelect={(favorite) => {
+            setOpen(false)
+            onSearch(favorite.query, favorite.vnums)
+          }}
+          onRemove={removeFavorite}
+        />
+        <span className={storageError ? 'favorites-storage-note' : 'visually-hidden'} role="status">{announcement}</span>
       </div>
     </section>
   )

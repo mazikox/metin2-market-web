@@ -210,13 +210,13 @@ export default function App() {
     }, 220)
   }
 
-  const handleSearchSubmit = (newQuery: string) => {
+  const handleSearchSubmit = (newQuery: string, savedVnums: number[] = []) => {
     if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
     suggestionControllerRef.current?.abort()
     setSuggestions([])
     setInputQuery(newQuery)
     setQuery(newQuery)
-    setVnums([])
+    setVnums(savedVnums)
     setActiveSuggestion(null)
     setPage(0)
   }
@@ -262,7 +262,9 @@ export default function App() {
         <Hero serverName={server.name} />
 
         <SearchSection
+          serverId={server.id}
           query={inputQuery}
+          queryVnums={inputQuery === query ? vnums : []}
           suggestions={suggestions}
           onSearch={handleSearchSubmit}
           onSelectSuggestion={handleSelectSuggestion}

@@ -24,6 +24,10 @@ export function CloseIcon(props: Props) {
   return <svg viewBox="0 0 24 24" aria-hidden="true" {...props}><path d="m6 6 12 12M18 6 6 18" {...base} /></svg>
 }
 
+export function StarIcon({ filled = false, ...props }: Props & { filled?: boolean }) {
+  return <svg viewBox="0 0 24 24" aria-hidden="true" {...props}><path d="m12 3 2.78 5.63L21 9.54l-4.5 4.39 1.06 6.2L12 17.2l-5.56 2.93 1.06-6.2L3 9.54l6.22-.91L12 3Z" {...base} fill={filled ? 'currentColor' : 'none'} /></svg>
+}
+
 export function StoreIcon(props: Props) {
   return <svg viewBox="0 0 24 24" aria-hidden="true" {...props}><path d="M4 10v10h16V10M3 10l2-6h14l2 6" {...base} /><path d="M3 10a3 3 0 0 0 5 2 3 3 0 0 0 4 0 3 3 0 0 0 4 0 3 3 0 0 0 5-2M9 20v-5h6v5" {...base} /></svg>
 }
