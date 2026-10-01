@@ -47,9 +47,3 @@
 
 .privacy-updated { color: #9e9c95; font-size: 12px; }
 .info-section a { color: #c49a5a; text-underline-offset: 4px; }
-.statistics-preferences { padding: 18px; border: 1px solid #454238; border-radius: 4px; }
-.statistics-preferences p { margin-top: 0; }
-.statistics-actions { display: flex; flex-wrap: wrap; gap: 12px; }
-.statistics-actions button { flex: 1 1 190px; padding: 12px 16px; border: 1px solid #c49a5a; border-radius: 3px; background: transparent; color: #f1eee7; font: inherit; cursor: pointer; }
-.statistics-actions button:hover { background: #24221d; }
-.statistics-actions button[aria-pressed="true"] { border-color: #f1eee7; }

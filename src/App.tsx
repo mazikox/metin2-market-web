@@ -26,6 +26,9 @@ export default function App() {
   const [vnums, setVnums] = useState<number[]>(server.id === 'pandora' ? [180, 181, 182, 183, 184, 185, 186, 187, 188, 189] : [])
   const [activeSuggestion, setActiveSuggestion] = useState<ItemSuggestion | null>(null)
   const [page, setPage] = useState(0)
+  // Tokens identify only an action/request and live in this mounted component.
+  const [searchId, setSearchId] = useState<string>()
+  const requestId = useMemo(() => crypto.randomUUID(), [page, searchId])
   const [sort, setSort] = useState<'api' | 'priceDesc' | 'quantity'>('api')
   const [mapFilter, setMapFilter] = useState('')
   const [rawItems, setRawItems] = useState<MarketOffer[]>([])
@@ -137,6 +140,8 @@ export default function App() {
         vnums: currentVnums,
         page: currentPage,
         size: PAGE_SIZE,
+        requestId,
+        searchId,
       }, signal)
       if (signal.aborted) return
 
@@ -200,7 +205,7 @@ export default function App() {
     } finally {
       if (!signal.aborted) setLoading(false)
     }
-  }, [api, computeLocalStats])
+  }, [api, computeLocalStats, requestId, searchId])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -232,6 +237,7 @@ export default function App() {
   }
 
   const handleSearchSubmit = (newQuery: string, savedVnums: number[] = []) => {
+    setSearchId(crypto.randomUUID())
     if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
     suggestionControllerRef.current?.abort()
     setSuggestions([])
@@ -243,6 +249,7 @@ export default function App() {
   }
 
   const handleSelectSuggestion = (s: ItemSuggestion) => {
+    setSearchId(crypto.randomUUID())
     if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
     suggestionControllerRef.current?.abort()
     setSuggestions([])

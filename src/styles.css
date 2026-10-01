@@ -1442,3 +1442,16 @@ footer.site-footer {
 .mobile-menu nav a:hover { background: var(--paper-3); color: var(--accent); }
 @media (max-width: 1040px) { .topbar { grid-template-columns: 1fr auto auto auto; gap: 16px; } .mobile-menu { display: block; } }
 @media (max-width: 680px) { .topbar { gap: 8px; } .topbar .brand { font-size: 17px; } .status-badge { display: none; } .topbar { grid-template-columns: 1fr auto auto; } }
+
+.admin-stats { padding-top: 48px; padding-bottom: 64px; }
+.admin-stats h1 { font-size: clamp(28px, 4vw, 48px); }
+.admin-stats h2 { margin-top: 36px; }
+.admin-stats p { color: #b7b4ad; max-width: 900px; line-height: 1.65; }
+.admin-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+.admin-cards > div { padding: 22px; border: 1px solid #454238; border-radius: 4px; }
+.admin-cards strong { display: block; font-size: 32px; color: #d1aa71; }
+.admin-cards span { color: #b7b4ad; }
+.admin-table { overflow-x: auto; }
+.admin-table table { border-collapse: collapse; width: 100%; text-align: left; white-space: nowrap; }
+.admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid #454238; }
+.admin-table th { color: #d1aa71; }

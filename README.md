@@ -38,17 +38,14 @@ nie udostępnia sitemapy i daje robots bez odsyłacza do sitemapy. Crawling pozo
 dozwolony, żeby robot mógł odczytać noindex. Nie blokuje to publicznego dostępu.
 Lokalny Vite dodaje noindex do katalogu niezależnie od konfiguracji produkcyjnej.
 
-## Analityka
+## Statystyki katalogu
 
-Frontend ładuje `/metrics/script.js` i wysyła zdarzenia do `/metrics/api/send`.
-Caddy udostępnia wyłącznie te dwie ścieżki Umami; panel administracyjny nie jest
-udostępniany przez prefiks metrics. Tracker działa tylko na metin2bazar.pl przez
-`data-domains`, a lokalny Vite nie wstawia skryptu. Nie tworzy to nowej bazy ani nie
-usuwa wcześniejszych statystyk. Aktualizacja domeny i nazwy istniejącej witryny
-Umami jest przygotowana w `ops/umami-metin2bazar.sql` w repo API.
-
-„Dane w przeglądarce” opisują frontend, nie zastępują pełnej informacji o prywatności.
-Tożsamość administratora, kontakt, retencja oraz konfiguracja logów wymagają dokończenia.
+Frontend oznacza pobrania wyników tokenem żądania przechowywanym tylko w pamięci.
+Token pojedynczej akcji wyszukiwania powstaje dopiero po submit/wyborze podpowiedzi.
+Retry używa tych samych tokenów; paginacja nie jest nowym wyszukiwaniem.
+Nie używamy cookies, localStorage ani identyfikatora przeglądarki do analytics.
+Prywatny panel `/admin/stats` używa `/backend/api/v1/admin/stats` na tej samej domenie.
+Caddy zabezpiecza obie ścieżki przez basic_auth. Instrukcja VPS: `docs/statystyki-katalogu.md` w repo API.
 
 ## Funkcje i testy
 

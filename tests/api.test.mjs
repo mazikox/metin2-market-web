@@ -114,3 +114,27 @@ test('malformed JSON reports an API error instead of remaining in loading state'
   t.mock.method(globalThis, 'fetch', async () => new Response('invalid JSON'))
   await assert.rejects(serverApis.elder.offers(offersOptions), (error) => error instanceof ApiError && /nieprawidłową/.test(error.message))
 })
+
+
+test('only offers carry explicitly provided operation tokens; retries reuse them', async (t) => {
+  const calls = []
+  t.mock.method(globalThis, 'fetch', async (url, options) => { calls.push({ url, headers: options.headers }); return Response.json({ items: [] }) })
+  const options = { ...offersOptions, requestId: 'request-token', searchId: 'search-token' }
+  await serverApis.pandora.offers(options)
+  await serverApis.pandora.offers(options)
+  await serverApis.pandora.suggestions('miecz')
+  await serverApis.pandora.statistics([180])
+  assert.equal(calls[0].headers['X-Catalog-Request'], 'request-token')
+  assert.equal(calls[0].headers['X-Catalog-Search'], 'search-token')
+  assert.deepEqual(calls[0].headers, calls[1].headers)
+  assert.equal(calls[2].headers['X-Catalog-Search'], undefined)
+  assert.equal(calls[3].headers['X-Catalog-Request'], undefined)
+})
+
+test('unmarked initial API call does not claim a user search', async (t) => {
+  let headers
+  t.mock.method(globalThis, 'fetch', async (_url, options) => { headers = options.headers; return Response.json({ items: [] }) })
+  await serverApis.pandora.offers({ ...offersOptions, requestId: 'initial-request' })
+  assert.equal(headers['X-Catalog-Request'], 'initial-request')
+  assert.equal(headers['X-Catalog-Search'], undefined)
+})

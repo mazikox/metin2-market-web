@@ -9,7 +9,7 @@ export class ApiError extends Error {
   constructor(message: string, public readonly status?: number) { super(message); this.name = 'ApiError' }
 }
 
-async function request<T>(path: string, signal?: AbortSignal, timeoutMs = 8000): Promise<T> {
+async function request<T>(path: string, signal?: AbortSignal, timeoutMs = 8000, catalogHeaders: Record<string, string> = {}): Promise<T> {
   if (signal?.aborted) throw signal.reason ?? new DOMException('Request cancelled', 'AbortError')
 
   const controller = new AbortController()
@@ -24,7 +24,7 @@ async function request<T>(path: string, signal?: AbortSignal, timeoutMs = 8000):
   try {
     const response = await fetch(API_BASE_URL + path, {
       signal: controller.signal,
-      headers: { Accept: 'application/json' },
+      headers: { Accept: 'application/json', ...catalogHeaders },
     })
     if (!response.ok) {
       throw new ApiError(response.status >= 500
@@ -56,12 +56,15 @@ function createServerApi(server: GameServerId) {
       const params = new URLSearchParams({ query: query.trim() })
       return request<SuggestionsResponse>(itemsPath + '/suggestions?' + params, signal, 4000)
     },
-    offers(options: { query?: string; vnums?: number[]; page: number; size: number }, signal?: AbortSignal) {
+    offers(options: { query?: string; vnums?: number[]; page: number; size: number; requestId?: string; searchId?: string }, signal?: AbortSignal) {
       const params = new URLSearchParams()
       if (options.query) params.set('query', options.query.trim())
       if (options.vnums?.length) options.vnums.forEach((v) => params.append('vnum', String(v)))
       params.set('page', String(options.page)); params.set('size', String(options.size))
-      return request<OffersResponse>(itemsPath + '?' + params, signal, 5000)
+      const headers: Record<string, string> = {}
+      if (options.requestId) headers['X-Catalog-Request'] = options.requestId
+      if (options.searchId) headers['X-Catalog-Search'] = options.searchId
+      return request<OffersResponse>(itemsPath + '?' + params, signal, 5000, headers)
     },
     statistics(vnums: number[], signal?: AbortSignal) {
       const params = new URLSearchParams()

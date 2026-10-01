@@ -22,18 +22,6 @@ function informationPages(isProduction: boolean): Plugin {
       ...(!isProduction || !site.indexable ? [
         { tag: 'meta', attrs: { name: 'robots', content: 'noindex' }, injectTo: 'head' as const },
       ] : []),
-      ...([{
-        tag: 'script',
-        attrs: {
-          defer: true, src: '/privacy-preferences.js',
-          'data-website-id': site.analytics.websiteId,
-          'data-host': site.analytics.host,
-          'data-domain': new URL(site.url).hostname,
-          'data-script': site.analytics.script,
-          'data-enabled': String(isProduction && site.indexable),
-        },
-        injectTo: 'head' as const,
-      }]),
     ],
   }
 }
