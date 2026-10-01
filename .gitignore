@@ -24,3 +24,15 @@ Thumbs.db
 .agents/
 skills/
 skills-lock.json
+
+# Generated information pages (scripts/generate-site.mjs)
+public/o-projekcie/
+public/jak-korzystac/
+public/dane-w-przegladarce/
+public/404.html
+public/robots.txt
+public/sitemap.xml
+
+# Local deployment archive
+/dist.tar.gz
+/frontend-release.tar.gz

@@ -1,0 +1,55 @@
+/* Shared by the catalog and the static information pages. */
+.skip-link { position: fixed; z-index: 100; top: 12px; left: 12px; padding: 14px 20px; background: #f1eee7; color: #0f1010; transform: translateY(-160%); border-radius: 3px; }
+.skip-link:focus { transform: translateY(0); }
+:focus-visible { outline: 2px solid #c49a5a; outline-offset: 5px; }
+.site-footer .footer-grid { display: grid; grid-template-columns: 1.5fr 0.8fr 1fr 1.2fr; gap: 36px; padding-top: 36px; padding-bottom: 44px; }
+.footer-intro p { max-width: 260px; line-height: 1.65; color: #b8b5ae; margin: 18px 0 10px; font-size: 14px; }
+.footer-caption { font-size: 12px; color: #9e9c95; }
+.footer-grid nav h2 { margin: 0 0 20px; color: #f1eee7; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.footer-grid nav a { display: block; color: #b8b5ae; font-size: 13px; line-height: 1.6; margin-top: 12px; width: fit-content; text-decoration: none; }
+.footer-grid nav a:hover { color: #c49a5a; text-decoration: underline; text-underline-offset: 4px; }
+.site-footer .footer-bottom { border-top: 1px solid #2a2b2b; display: flex; justify-content: space-between; gap: 16px; padding-top: 22px; padding-bottom: 24px; color: #9e9c95; font-size: 12px; line-height: 1.5; }
+.information-page { margin: 0; background: #0f1010; color: #f1eee7; font: 15px/1.6 Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+.information-page * { box-sizing: border-box; }
+.information-page a { color: inherit; }
+.information-page .shell { max-width: 1500px; margin: 0 auto; padding-left: clamp(20px, 3.2vw, 56px); padding-right: clamp(20px, 3.2vw, 56px); }
+.information-page .brand { display: inline-flex; align-items: center; gap: 7px; font-size: 22px; font-weight: 700; letter-spacing: -.04em; text-decoration: none; white-space: nowrap; }
+.information-page .brand span { color: #c49a5a; }
+.information-page .brand img { margin-right: 3px; }
+.info-header { border-bottom: 1px solid #2a2b2b; }
+.info-header .shell { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.back-to-market { display: inline-block; color: #c49a5a !important; font-size: 14px; text-decoration: none; padding: 10px 0; }
+.back-to-market:hover { text-decoration: underline; text-underline-offset: 5px; }
+.info-main { padding-top: 70px; padding-bottom: 90px; }
+.information-page .eyebrow { font-size: 11px; color: #c49a5a; text-transform: uppercase; letter-spacing: .15em; }
+.info-heading { max-width: 900px; margin-bottom: 64px; }
+.info-heading h1 { font-size: clamp(42px, 5.8vw, 86px); line-height: 1; letter-spacing: -.055em; font-weight: 400; margin: 24px 0; }
+.info-lead { font-size: 19px; color: #b8b5ae; max-width: 680px; line-height: 1.6; }
+.info-layout { display: grid; grid-template-columns: minmax(200px, .6fr) minmax(0, 1.4fr); gap: clamp(32px, 6vw, 100px); max-width: 1180px; }
+.contents { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; font-size: 13px; }
+.contents a { text-decoration: none; color: #b8b5ae; }
+.contents a:hover { color: #c49a5a; }
+.info-section { margin: 0 0 44px; padding-top: 22px; border-top: 1px solid #2a2b2b; scroll-margin-top: 24px; }
+.info-section h2 { font-size: 26px; line-height: 1.25; font-weight: 400; letter-spacing: -.025em; margin: 0 0 22px; }
+.info-section p { color: #b8b5ae; line-height: 1.8; }
+.faq details { border-top: 1px solid #2a2b2b; }
+.faq summary { cursor: pointer; padding: 20px 0; font-size: 16px; }
+.faq details p { margin-top: 0; }
+.information-page .site-footer { background: #0a0b0b; border-top: 1px solid #2a2b2b; }
+@media (max-width: 900px) { .site-footer .footer-grid { grid-template-columns: repeat(3, 1fr); } .footer-intro { grid-column: 1 / -1; } .info-layout { grid-template-columns: 1fr; } .contents { padding-bottom: 20px; } }
+@media (max-width: 600px) { .site-footer .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px 20px; } .site-footer .footer-bottom { flex-direction: column; } .info-header .shell { flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px; gap: 8px; } .info-main { padding-top: 40px; padding-bottom: 50px; } .info-heading { margin-bottom: 36px; } .info-lead { font-size: 17px; } }
+
+.privacy-disclosure summary { cursor: pointer; color: #f1eee7; }
+.privacy-disclosure summary h2 { display: inline; margin: 0; }
+.privacy-disclosure summary::marker { color: #c49a5a; }
+.privacy-disclosure[open] summary { margin-bottom: 22px; }
+.privacy-disclosure a { color: #c49a5a; overflow-wrap: anywhere; text-underline-offset: 4px; }
+
+.privacy-updated { color: #9e9c95; font-size: 12px; }
+.info-section a { color: #c49a5a; text-underline-offset: 4px; }
+.statistics-preferences { padding: 18px; border: 1px solid #454238; border-radius: 4px; }
+.statistics-preferences p { margin-top: 0; }
+.statistics-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.statistics-actions button { flex: 1 1 190px; padding: 12px 16px; border: 1px solid #c49a5a; border-radius: 3px; background: transparent; color: #f1eee7; font: inherit; cursor: pointer; }
+.statistics-actions button:hover { background: #24221d; }
+.statistics-actions button[aria-pressed="true"] { border-color: #f1eee7; }

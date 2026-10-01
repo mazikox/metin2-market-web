@@ -1426,3 +1426,19 @@ footer.site-footer {
     scroll-behavior: auto !important;
   }
 }
+
+/* Information links and compact navigation */
+.manifesto .eyebrow { color: var(--muted); }
+.manifesto .data-note { margin-top: 32px; padding: 20px 24px; border-left: 2px solid var(--accent); background: var(--paper-2); }
+.manifesto .data-note strong { font-weight: 500; color: var(--ink); }
+.manifesto .data-note p { margin: 10px 0 0; max-width: 620px; font-size: 14px; }
+.info-links { display: flex; flex-wrap: wrap; gap: 16px 32px; margin-top: 28px; }
+.info-links a { color: var(--accent); font-size: 14px; text-decoration: none; }
+.info-links a:hover { text-decoration: underline; text-underline-offset: 5px; }
+.mobile-menu { display: none; position: relative; }
+.mobile-menu summary { cursor: pointer; color: var(--ink); font-size: 13px; padding: 12px 6px; }
+.mobile-menu nav { position: absolute; right: 0; top: calc(100% + 10px); background: var(--paper-2); border: 1px solid var(--line); min-width: 210px; box-shadow: 0 15px 40px #0008; padding: 10px; }
+.mobile-menu nav a { display: block; padding: 12px; text-decoration: none; color: var(--ink-dim); }
+.mobile-menu nav a:hover { background: var(--paper-3); color: var(--accent); }
+@media (max-width: 1040px) { .topbar { grid-template-columns: 1fr auto auto auto; gap: 16px; } .mobile-menu { display: block; } }
+@media (max-width: 680px) { .topbar { gap: 8px; } .topbar .brand { font-size: 17px; } .status-badge { display: none; } .topbar { grid-template-columns: 1fr auto auto; } }

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type { MarketOffer } from '../types'
 import { formatCoordinates, formatFull, formatObservedAt, iconPath, shortMap } from '../format'
 import { getSoulStones } from '../soulStones'
@@ -10,16 +10,31 @@ interface ItemDrawerProps {
 }
 
 export function ItemDrawer({ item, onClose }: ItemDrawerProps) {
+  const drawerRef = useRef<HTMLElement>(null)
   useEffect(() => {
     if (!item) return
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const background = [...document.querySelectorAll<HTMLElement>('header.site-header, #main-content, .site-footer')]
+      .map(element => ({ element, inert: element.inert }))
+    background.forEach(({ element }) => { element.inert = true })
+    drawerRef.current?.querySelector<HTMLButtonElement>('button')?.focus()
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
+      if (e.key !== 'Tab') return
+      const controls = [...(drawerRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), summary, [tabindex="0"]') || [])]
+        .filter(element => element.getClientRects().length > 0)
+      const first = controls[0]
+      const last = controls[controls.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus() }
     }
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     document.addEventListener('keydown', handleKeyDown)
 
     return () => {
+      background.forEach(({ element, inert }) => { element.inert = inert })
+      previousFocus?.focus()
       document.body.style.overflow = prevOverflow
       document.removeEventListener('keydown', handleKeyDown)
     }
@@ -42,7 +57,7 @@ export function ItemDrawer({ item, onClose }: ItemDrawerProps) {
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <section className="drawer" id="drawer">
+      <section className="drawer" id="drawer" ref={drawerRef}>
         <div className="drawer-top">
           <div className="eyebrow">Szczegóły oferty</div>
           <button

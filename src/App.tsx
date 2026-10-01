@@ -11,6 +11,7 @@ import { Footer } from './components/Footer'
 import { ItemDrawer } from './components/ItemDrawer'
 import { shortMap } from './format'
 import { getSelectedServer } from './servers'
+import site from './site.json'
 
 const PAGE_SIZE = 8
 type ActiveSection = 'market' | 'catalog' | 'about' | null
@@ -41,8 +42,24 @@ export default function App() {
   const suggestionControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    document.title = 'Metin Market — ' + server.name
-  }, [server.name])
+    const title = `Rynek Metin2 ${server.name} — ${site.name}`
+    const description = `Porównuj ceny, bonusy i lokalizacje przedmiotów na serwerze ${server.name}. Przeglądaj oferty z opublikowanych skanów rynku Metin2.`
+    const canonical = site.url + (server.id === 'pandora' ? '/' : '/?server=' + server.id)
+    document.title = title
+    document.querySelector('meta[name="description"]')?.setAttribute('content', description)
+    // The shared HTML cannot know which server query is requested.
+    // Inject one canonical instead of changing a conflicting value in the HTML.
+    let canonicalLink = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link')
+      canonicalLink.rel = 'canonical'
+      document.head.appendChild(canonicalLink)
+    }
+    canonicalLink.href = canonical
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', title)
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', description)
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonical)
+  }, [server.name, server.id])
 
   useEffect(() => {
     let frame = 0
@@ -257,12 +274,14 @@ export default function App() {
   }, [rawItems])
 
   const maxPage = Math.ceil(totalElements / PAGE_SIZE) - 1
+  const closeDrawer = useCallback(() => setActiveDrawerItem(null), [])
 
   return (
     <>
+      <a className="skip-link" href="#main-content">Przejdź do treści</a>
       <Header apiStatus={apiStatus} currentServer={server.id} activeSection={activeSection} />
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <Hero serverName={server.name} />
 
         <SearchSection
@@ -288,7 +307,7 @@ export default function App() {
               <div className="toolbar">
                 <div className="filters">
                   <label className="field">
-                    Sortowanie
+                    Sortowanie tej strony
                     <select
                       className="custom-select"
                       value={sort}
@@ -301,7 +320,7 @@ export default function App() {
                   </label>
 
                   <label className="field">
-                    Mapa
+                    Mapa na tej stronie
                     <select
                       className="custom-select"
                       value={mapFilter}
@@ -390,7 +409,7 @@ export default function App() {
 
       <ItemDrawer
         item={activeDrawerItem}
-        onClose={() => setActiveDrawerItem(null)}
+        onClose={closeDrawer}
       />
 
     </>

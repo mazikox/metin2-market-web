@@ -1,0 +1,12 @@
+{
+  "name": "Metin2 Bazar",
+  "indexable": true,
+  "url": "https://metin2bazar.pl",
+  "analytics": {"script": "/metrics/script.js", "host": "/metrics", "websiteId": "6754c5f8-9c5d-4b21-babb-5fa96b970c5f"},
+  "description": "Porównuj ceny, bonusy i lokalizacje przedmiotów na rynkach Pandora, Elder i Beavium. Oferty ze skanów Metin2 w jednym miejscu.",
+  "footerGroups": [
+    {"title": "Rynki", "links": [{"label": "Pandora", "href": "/"}, {"label": "Elder", "href": "/?server=elder"}, {"label": "Beavium", "href": "/?server=beavium"}]},
+    {"title": "Przewodnik", "links": [{"label": "O projekcie", "href": "/o-projekcie/"}, {"label": "Jak korzystać", "href": "/jak-korzystac/"}, {"label": "Pytania i odpowiedzi", "href": "/jak-korzystac/#pytania"}]},
+    {"title": "Informacje", "links": [{"label": "Źródło i aktualność danych", "href": "/jak-korzystac/#dane"}, {"label": "Prywatność", "href": "/dane-w-przegladarce/"}]}
+  ]
+}

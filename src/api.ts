@@ -2,7 +2,7 @@ import type { OffersResponse, StatisticsResponse, SuggestionsResponse } from './
 import type { GameServerId } from './servers'
 
 const urlParamApi = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('api') : null
-const CONFIGURED_API_URL = (urlParamApi || import.meta.env.VITE_API_BASE_URL || 'https://api.mazikox.pl').replace(/\/$/, '')
+const CONFIGURED_API_URL = (urlParamApi || import.meta.env.VITE_API_BASE_URL || '/backend').replace(/\/$/, '')
 const API_BASE_URL = import.meta.env.DEV && !urlParamApi ? '/backend' : CONFIGURED_API_URL
 
 export class ApiError extends Error {

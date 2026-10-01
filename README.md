@@ -1,75 +1,62 @@
-# Metin Market
+# Metin2 Bazar
 
-Publiczny, responsywny frontend do przeglądania ofert i statystyk rynku Metin2.
+Frontend katalogu ofert Metin2: Pandora, Elder i Beavium.
+Adres docelowy: `https://metin2bazar.pl`.
 
 ## Uruchomienie
 
-```bash
-cp .env.example .env
-npm install
-npm run dev
-```
+Skopiuj `.env.example` do `.env` i uruchom `npm install`, następnie `npm run dev`.
+`VITE_API_BASE_URL=/backend` oznacza API pod tym samym originem co witryna.
+Deweloperski proxy kieruje zapytania na `VITE_API_PROXY_TARGET`, domyślnie
+`http://127.0.0.1:8080`. Może to być lokalny backend lub lokalny tunel SSH do VPS.
 
-Build produkcyjny:
+`npm run build` tworzy `dist`; `npm run preview` pokazuje ten build, ale proxy API
+produkcyjnego obsługuje Caddy, a nie sam serwer preview.
 
-```bash
-npm run build
-npm run preview
-```
+## Publikacja i dwa adresy
 
-`VITE_API_BASE_URL` wskazuje bazowy adres API. W trybie deweloperskim Vite pośredniczy w zapytaniach, ponieważ publiczne API odrzuca origin `localhost`; build produkcyjny korzysta bezpośrednio ze skonfigurowanego adresu.
+Obie domeny korzystają z jednego katalogu `/var/www/metin2bazar` i tej samej bazy.
+Nowa domena jest adresem kanonicznym i ma sitemapę. Dotychczasowy adres jest
+obsługiwany jako nieindeksowane lustro przez konfigurację Caddy w repo API:
+`ops/Caddyfile`. Stare domeny pozostają wyłącznie w konfiguracji kompatybilności.
+Instrukcja uruchomienia i DNS: `E:/metin-market-api/docs/uruchomienie-metin2bazar.md`.
+Nowy katalog publikacji należy utworzyć z uprawnieniami użytkownika wdrożeniowego
+przed uruchomieniem workflow. Workflow wykonuje testy, build i publikację plików;
+nie aktywuje konfiguracji Caddy ani DNS.
 
-## Testy klienta API
+## Podstrony i SEO
 
-`npm test` (Node.js 22 lub nowszy) sprawdza timeout całej odpowiedzi, anulowanie wyszukiwania,
-sprzątanie listenerów, obsługę błędów i ponowne zapytanie po przerwanym pobieraniu.
-Limit czasu obejmuje także odczyt JSON po otrzymaniu nagłówków HTTP.
-Oferty stają się dostępne przed zakończeniem opcjonalnego pobierania statystyk.
+`src/site.json` zawiera markę, canonical origin, flagę `indexable` i ustawienia analityki.
+`content/pages.json` zawiera treści podstron. `scripts/generate-site.mjs` generuje
+statyczne podstrony, 404, robots i sitemapę przed buildem. W trybie `predev` argument
+`--noindex` wyłącza sitemapę oraz skrypt analityczny. Po zmianie treści podczas pracy
+z Vite uruchom `node scripts/generate-site.mjs --noindex`.
 
-Do ręcznej weryfikacji ekranu można uruchomić `node tests/fixtures/market-api.mjs`
-i otworzyć lokalny frontend z `?server=elder&api=http://127.0.0.1:4321`.
-Frazy `stall-body` i `retry-body` symulują zatrzymanie odpowiedzi po statusie 200
-(druga fraza działa po ponowieniu), `slow-statistics` zatrzymuje statystyki,
-a `slow-offers` opóźnia oferty, umożliwiając sprawdzenie szybkiej zmiany wyszukiwania.
-Backend testowy nasłuchuje wyłącznie na lokalnym adresie 127.0.0.1.
+Produkcyjny build jest przeznaczony dla metin2bazar.pl. `indexable: true` umożliwia
+indeksowanie nowej domeny. Caddy na starym adresie dodaje `X-Robots-Tag: noindex`,
+nie udostępnia sitemapy i daje robots bez odsyłacza do sitemapy. Crawling pozostaje
+dozwolony, żeby robot mógł odczytać noindex. Nie blokuje to publicznego dostępu.
+Lokalny Vite dodaje noindex do katalogu niezależnie od konfiguracji produkcyjnej.
 
-## Struktura
+## Analityka
 
-- `src/api.ts` — klient API i obsługa błędów
-- `src/types.ts` — modele odpowiedzi API
-- `src/components/` — wyszukiwarka, statystyki, oferty i ikony
-- `src/styles.css` — responsywny system wizualny bez biblioteki UI
-- `public/items/` — statyczne ikony dostępne pod `/items/{VNUM}.png`
+Frontend ładuje `/metrics/script.js` i wysyła zdarzenia do `/metrics/api/send`.
+Caddy udostępnia wyłącznie te dwie ścieżki Umami; panel administracyjny nie jest
+udostępniany przez prefiks metrics. Tracker działa tylko na metin2bazar.pl przez
+`data-domains`, a lokalny Vite nie wstawia skryptu. Nie tworzy to nowej bazy ani nie
+usuwa wcześniejszych statystyk. Aktualizacja domeny i nazwy istniejącej witryny
+Umami jest przygotowana w `ops/umami-metin2bazar.sql` w repo API.
 
-## Redesign rynku
+„Dane w przeglądarce” opisują frontend, nie zastępują pełnej informacji o prywatności.
+Tożsamość administratora, kontakt, retencja oraz konfiguracja logów wymagają dokończenia.
 
-Inter i tokeny powierzchni z DESIGN.md; kompaktowy układ, cena za sztukę jako
-główna wartość oferty. Statystyki pozostają rozdzielone według VNUM.
+## Funkcje i testy
 
-Sortowanie w `src/sortOffers.ts` obejmuje wyłącznie załadowaną stronę.
-Tryb domyślny zachowuje kolejność odpowiedzi API.
+`npm test` sprawdza timeouty, anulowanie, odczyt błędów i odzyskanie klienta API po błędzie.
+Sortowanie i filtr mapy obejmują pobraną stronę. Oferty pochodzą z opublikowanego skanu;
+stan połączenia API nie oznacza aktualności oferty. Ulubione zapisują się w localStorage
+osobno dla serwera i originu; nie przenoszą się automatycznie pomiędzy domenami.
 
-`formatCoordinates` w `src/format.ts` zakłada 100 jednostek świata na jedną
-współrzędną gry i zaokrągla w dół. Nie stosuje offsetów map — repozytorium nie
-zawiera autorytatywnej konwencji. Identyfikatory map i slotów pozostają surowe.
-
-Podpowiedzi korzystają z wzorca combobox GodUI (wyszukiwanie asynchroniczne,
-wyróżnienie dopasowania, aktywny wiersz i klawiatura), bez nowej biblioteki UI.
-
-Osadzone Kamienie Duszy rozpoznaje `src/soulStones.ts`. Wartości socketów
-`28630–28643` są pokazywane nazwą i poziomem +5, a odpowiadające im grafiki
-pochodzą z serii ikon `28000–28013`. Pozostałe wartości pozostają wyłącznie
-w rozwijanych danych technicznych slotów.
-
-
-## Ulubione
-
-Gwiazdka po prawej stronie pola wyszukiwania zapisuje lub usuwa wpisaną frazę.
-Zapisane frazy pojawiają się pod „Szybkim wyborem”; kliknięcie uruchamia wyszukiwanie,
-a przycisk × usuwa wpis. Sekcja jest ukryta, gdy lista jest pusta.
-Ulubione są przechowywane w `localStorage` osobno dla każdego serwera i profilu przeglądarki,
-bez konta użytkownika. Dla wybranego przedmiotu lub rodziny zachowywany jest także filtr VNUM.
-
-## Serwery
-
-Widok Pandory jest dostępny pod adresem głównym. Elder i Beavium mają osobne adresy widoków: ?server=elder oraz ?server=beavium. Każdy widok pobiera oferty, podpowiedzi i statystyki z tras /api/v1/servers/{serwer}/items. Selektor serwera zachowuje pozostałe parametry adresu, w tym opcjonalne api używane lokalnie.
+Podstrony są generowane do public i kopiowane do dist. Caddy obsługuje ich index.html
+oraz prawdziwe 404 bez fallbacku dowolnego URL na katalog. Nazwy projektów, paczek Java
+oraz klucze ulubionych zachowano dla zgodności — nie są odnośnikami do starej domeny.

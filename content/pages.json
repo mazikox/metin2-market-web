@@ -1,0 +1,159 @@
+[
+  {
+    "slug": "o-projekcie",
+    "eyebrow": "O projekcie",
+    "title": "Rynek bliżej gracza.",
+    "description": "Poznaj Metin2 Bazar: niezależny katalog ofert ze skanów rynków Pandora, Elder i Beavium.",
+    "intro": "Metin2 Bazar porządkuje oferty ze skanów rynku, aby ułatwić porównywanie przedmiotów, cen i sklepów.",
+    "sections": [
+      {
+        "id": "katalog",
+        "title": "Wszystko, co pomaga porównać ofertę",
+        "paragraphs": [
+          "Wyszukuj przedmioty po nazwie, wybieraj warianty ulepszenia i porównuj ceny za sztukę. W szczegółach oferty znajdziesz dostępne bonusy, kamienie, dane sklepu oraz czas obserwacji.",
+          "Pandora, Elder i Beavium mają osobne katalogi. Zmień serwer w nagłówku, aby przeglądać właściwy rynek."
+        ]
+      },
+      {
+        "id": "charakter",
+        "title": "Katalog informacyjny",
+        "paragraphs": [
+          "Serwis pomaga znaleźć i porównać oferty. Nie prowadzi sprzedaży, nie przyjmuje płatności i nie pośredniczy w transakcjach. Dostępność przedmiotu oraz warunki zakupu sprawdzisz bezpośrednio w grze.",
+          "To niezależny projekt dla graczy. Nie jest oficjalną stroną wydawcy Metin2 ani administracji prezentowanych serwerów. Nazwy i materiały związane z grą należą do ich odpowiednich właścicieli."
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "jak-korzystac",
+    "eyebrow": "Przewodnik",
+    "title": "Znajdź ofertę. Zrozum dane.",
+    "description": "Jak wyszukiwać przedmioty w Metin2 Bazar, porównywać oferty i odczytywać dane ze skanów rynku.",
+    "intro": "Trzy kroki do porównania ofert — i kilka wskazówek, które pomogą właściwie odczytać wyniki.",
+    "sections": [
+      {
+        "id": "wyszukiwanie",
+        "title": "01 / Wybierz serwer i przedmiot",
+        "paragraphs": [
+          "Ustaw serwer w nagłówku. Wpisz nazwę przedmiotu i skorzystaj z podpowiedzi, aby wybrać konkretny wariant albo rodzinę ulepszeń. Uruchom wyszukiwanie przyciskiem lub klawiszem Enter.",
+          "Gwiazdka przy wyszukiwaniu zapisuje je w ulubionych. Lista jest osobna dla każdego serwera i dostępna w tej przeglądarce."
+        ]
+      },
+      {
+        "id": "porownanie",
+        "title": "02 / Porównaj więcej niż cenę",
+        "paragraphs": [
+          "Cena na liście jest ceną za sztukę, podaną w Yang. Otwórz szczegóły, aby sprawdzić ilość, bonusy, kamienie, sklep i lokalizację. Przedmioty o tej samej nazwie mogą różnić się właściwościami.",
+          "Zmiana sortowania na najdroższe lub największą ilość oraz filtr mapy dotyczą aktualnie pobranej strony wyników. Korzystaj z przycisków paginacji, aby przeglądać kolejne oferty."
+        ]
+      },
+      {
+        "id": "dane",
+        "title": "03 / Sprawdź aktualność w grze",
+        "paragraphs": [
+          "Oferty pochodzą z najnowszego opublikowanego skanu dostępnego dla wybranego serwera. Katalog nie pokazuje rynku w czasie rzeczywistym. Przedmiot mógł zostać sprzedany, a sklep zamknięty lub przeniesiony.",
+          "Czas obserwacji znajdziesz w szczegółach oferty. Zielony status API potwierdza działające połączenie z katalogiem; nie potwierdza aktualności konkretnej oferty.",
+          "Statystyki cen mają charakter orientacyjny. Przy porównywaniu różnych wariantów przedmiotu lub różnych bonusów nie traktuj jednej wartości jako wyceny każdego egzemplarza."
+        ]
+      }
+    ],
+    "faq": [
+      {
+        "question": "Czy mogę kupić przedmiot na tej stronie?",
+        "answer": "Nie. Metin2 Bazar jest katalogiem informacyjnym. Przedmiot kupisz w grze, po sprawdzeniu sklepu i dostępności."
+      },
+      {
+        "question": "Dlaczego nie widzę sklepu z oferty?",
+        "answer": "Dane przedstawiają moment skanowania rynku. Sklep mógł zostać zamknięty lub przeniesiony, a przedmiot sprzedany."
+      },
+      {
+        "question": "Co zrobić, kiedy nie ma wyników?",
+        "answer": "Sprawdź wybrany serwer, skróć nazwę przedmiotu lub wybierz podpowiedź. Jeśli filtrujesz mapę, ustaw wszystkie mapy. Brak wyników może też oznaczać brak przedmiotu w dostępnym skanie."
+      },
+      {
+        "question": "Co oznacza VNUM?",
+        "answer": "To identyfikator typu przedmiotu w grze. Pomaga odróżnić warianty, które mogą mieć podobne nazwy."
+      },
+      {
+        "question": "Czy ulubione są dostępne na innym urządzeniu?",
+        "answer": "Nie są automatycznie synchronizowane. Przechowuje je lokalnie przeglądarka. Wyczyszczenie danych witryny usuwa zapisane wyszukiwania."
+      }
+    ]
+  },
+  {
+    "slug": "dane-w-przegladarce",
+    "eyebrow": "Prywatność",
+    "title": "Prywatność i dane.",
+    "description": "Zasady prywatności Metin2 Bazar: działanie katalogu, logi, opcjonalne statystyki i ulubione w przeglądarce.",
+    "intro": "Korzystasz z katalogu bez konta i płatności. Statystyki są opcjonalne, a ulubione pozostają w Twojej przeglądarce.",
+    "updated": "1 października 2026",
+    "sections": [
+      {
+        "id": "dzialanie",
+        "title": "Działanie katalogu",
+        "paragraphs": [
+          "Przy wyszukiwaniu otrzymujemy nazwę lub identyfikator przedmiotu, wybrany serwer i parametry wyników. Połączenie obejmuje też adres IP i informacje o przeglądarce. Logi zapisują m.in. czas i adres żądania; pomagają usuwać błędy i przeciwdziałać nadużyciom.",
+          "Podstawą przetwarzania danych osobowych jest prawnie uzasadniony interes administratora: udostępnianie sprawnego i bezpiecznego katalogu (art. 6 ust. 1 lit. f RODO). Dane połączenia są konieczne do obsługi strony; bez nich nie wyświetlimy wyników. Logi przechowujemy do 90 dni, czasem krócej ze względu na limit miejsca."
+        ]
+      },
+      {
+        "id": "statystyki",
+        "title": "Opcjonalne statystyki",
+        "analyticsPreferences": true,
+        "paragraphs": [
+          "Za Twoją zgodą korzystamy z Umami na własnym serwerze, aby sprawdzać, jak wykorzystywany jest katalog. Statystyki obejmują odwiedzane strony i parametry adresów, źródło wejścia, urządzenie, przeglądarkę, system, język oraz przybliżoną lokalizację ustalaną z IP. Umami nie zapisuje surowego IP w bazie statystyk, nie używa cookies i nie nagrywa sesji.",
+          "Podstawą jest zgoda (art. 6 ust. 1 lit. a RODO). Domyślnie statystyki są wyłączone. Odmowa nie ogranicza katalogu. Zgodę możesz cofnąć poniżej; nie zmienia to zgodności wcześniejszego przetwarzania. Wybór pamiętamy na tym urządzeniu i tej domenie przez 12 miesięcy.",
+          "Odsłony i zdarzenia przechowujemy przez 12 miesięcy, aby porównywać wykorzystanie katalogu w ciągu roku. Starsze zapisy usuwamy codziennie; informacje o sesji pozostają, gdy są powiązane z aktywnością z tego okresu."
+        ]
+      },
+      {
+        "id": "ulubione",
+        "title": "Ulubione na urządzeniu",
+        "paragraphs": [
+          "Ulubione wyszukiwania zapisujemy w pamięci przeglądarki na Twoje żądanie. Nie synchronizujemy ich między urządzeniami ani domenami. Pozostają do usunięcia gwiazdką, przyciskiem obok pozycji lub przez wyczyszczenie danych witryny. Nie wykorzystujemy ich do reklam."
+        ]
+      },
+      {
+        "id": "oferty",
+        "title": "Dane z gry",
+        "paragraphs": [
+          "Katalog pochodzi ze skanów publicznego rynku gry: zawiera przedmioty, ceny, bonusy, nazwy sklepów, lokalizacje w grze i czas obserwacji. Lokalizacja sklepu nie oznacza miejsca pobytu gracza. Dane ofert przechowujemy tak długo, jak służą prezentowaniu katalogu i historii cen; nie obejmuje ich termin usuwania statystyk odwiedzin.",
+          "Jeżeli nazwa sklepu lub treść oferty pozwala Cię zidentyfikować, możesz zgłosić to administratorowi. Takie dane pochodzą z rynku gry, a ich prezentacja służy porównywaniu ofert — na podstawie prawnie uzasadnionego interesu (art. 6 ust. 1 lit. f RODO). Możesz zgłosić sprzeciw lub żądać usunięcia danych."
+        ]
+      },
+      {
+        "id": "dostawcy",
+        "title": "Hosting i wiadomości",
+        "paragraphs": [
+          "Infrastrukturę zapewnia OVHcloud. Analityka działa na naszym serwerze; nie wysyłamy jej wyników do usługi chmurowej Umami. Dane mogą zostać udostępnione uprawnionym organom, jeśli wymaga tego prawo.",
+          "OVHcloud wykonuje codzienną kopię serwera służącą do odtworzenia serwisu po awarii. Usunięte dane mogą pozostawać w ostatniej kopii do zastąpienia jej kolejną; nie wykorzystujemy kopii do bieżącej analityki.",
+          "Jeżeli do nas napiszesz, wykorzystamy adres e-mail i treść wiadomości, aby odpowiedzieć i załatwić sprawę (art. 6 ust. 1 lit. f RODO); przy realizacji praw dotyczących danych podstawą jest obowiązek prawny (art. 6 ust. 1 lit. c RODO). Podanie danych jest dobrowolne, ale bez adresu nie odpowiemy. Korespondencję przechowujemy do zakończenia sprawy, dłużej tylko przez czas wymagany prawem lub konieczny do rozstrzygnięcia roszczeń.",
+          "Poczta działa w Gmail (Google). Dane korespondencji mogą być przetwarzane poza EOG, w tym w USA. Google opisuje zabezpieczenia transferów, w tym EU–US Data Privacy Framework i standardowe klauzule umowne, pod poniższym linkiem."
+        ],
+        "links": [
+          {
+            "label": "Zasady ochrony danych i transferów Google",
+            "href": "https://policies.google.com/privacy/frameworks?hl=pl"
+          }
+        ]
+      },
+      {
+        "id": "prawa",
+        "title": "Twoje prawa",
+        "paragraphs": [
+          "Na zasadach określonych w RODO możesz żądać dostępu do danych, ich sprostowania, usunięcia i ograniczenia przetwarzania. Możesz sprzeciwić się przetwarzaniu opartemu na uzasadnionym interesie, cofnąć zgodę na statystyki, a gdy spełnione są warunki — żądać przeniesienia danych.",
+          "Napisz do administratora wskazanego poniżej. Możesz również złożyć skargę do Prezesa UODO. Nie podejmujemy wobec Ciebie zautomatyzowanych decyzji wywołujących skutki prawne lub podobnie istotnie wpływających na Twoją sytuację."
+        ]
+      },
+      {
+        "id": "administrator",
+        "title": "Administrator i kontakt",
+        "collapsed": true,
+        "contactEmail": "krystianmaz0101@gmail.com",
+        "paragraphs": [
+          "Administratorem danych osobowych w Metin2 Bazar jest Krystian Mazurek. W sprawach prywatności oraz realizacji praw skontaktuj się przez e-mail:"
+        ]
+      }
+    ]
+  }
+]

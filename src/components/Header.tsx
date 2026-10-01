@@ -19,9 +19,9 @@ export function Header({ apiStatus, currentServer, activeSection }: HeaderProps)
   return (
     <header className="site-header">
       <div className="shell topbar">
-        <a href="#" className="brand" aria-label="Metin Market — powrót do góry">
+        <a href="#" className="brand" aria-label="Metin2 Bazar — powrót do góry">
           <img src="/favicon.png" alt="" className="brand-logo" width="26" height="26" />
-          METIN <span>MARKET</span>
+          METIN2 <span>BAZAR</span>
         </a>
         <label className="server-switcher">
           <span>Serwer</span>
@@ -34,6 +34,16 @@ export function Header({ apiStatus, currentServer, activeSection }: HeaderProps)
           <a href="#catalog" className={activeSection === 'catalog' ? 'active' : undefined} aria-current={activeSection === 'catalog' ? 'location' : undefined}>Przedmioty</a>
           <a href="#about" className={activeSection === 'about' ? 'active' : undefined} aria-current={activeSection === 'about' ? 'location' : undefined}>O danych</a>
         </nav>
+        <details className="mobile-menu">
+          <summary>Menu</summary>
+          <nav aria-label="Nawigacja mobilna">
+            <a href="#market" onClick={(event) => event.currentTarget.closest('details')?.removeAttribute('open')}>Rynek</a>
+            <a href="#catalog" onClick={(event) => event.currentTarget.closest('details')?.removeAttribute('open')}>Przedmioty</a>
+            <a href="#about" onClick={(event) => event.currentTarget.closest('details')?.removeAttribute('open')}>O danych</a>
+            <a href="/jak-korzystac/">Jak korzystać</a>
+            <a href="/o-projekcie/">O projekcie</a>
+          </nav>
+        </details>
         <div className="status-badge" aria-live="polite">
           <i className={'status-dot ' + statusClass} aria-hidden="true" />
           <span>{statusText}</span>
