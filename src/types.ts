@@ -110,6 +110,7 @@ export interface ItemStatistic {
   contributingShopCount: number
   rawOfferCount: number
   totalQuantity: number
+  totalPriceLevelCount?: number
   outliers?: OutlierSummary
   buyerReference?: BuyerReference
   histogram?: HistogramBin[]

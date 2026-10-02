@@ -417,9 +417,9 @@ export default function App() {
       />
 
       <AnalyticsDrawer
-        isOpen={isAnalyticsOpen}
+        isOpen={isAnalyticsOpen && stat != null}
         onClose={closeAnalytics}
-        stat={stat || (familyStats && familyStats[0]) || null}
+        stat={stat}
       />
     </>
   )

@@ -15,16 +15,18 @@ test('small sample threshold is consistently configured as 10 across aside and a
   assert.equal(Number(analyticsMatch[1]), 10, 'Analytics small sample threshold must be 10')
 })
 
-test('enriched statistics payload structure matches expected domain model', async () => {
+test('enriched statistics payload structure matches expected domain model with totalPriceLevelCount', async () => {
   const sampleStat = {
     vnum: 189,
     itemName: 'Zatruty Miecz+9',
     minimumPrice: 800000,
     meanPrice: 1050000,
+    trimmedMeanPrice: 980000,
     medianPrice: 950000,
     contributingShopCount: 15,
     rawOfferCount: 22,
     totalQuantity: 28,
+    totalPriceLevelCount: 18,
     percentiles: {
       p10: 800000,
       p20: 820000,
@@ -34,11 +36,11 @@ test('enriched statistics payload structure matches expected domain model', asyn
       p90: 1400000,
     },
     buyerReference: {
+      percentile: 20,
       price: 820000,
       shopsAtOrBelow: 3,
       quantityAtOrBelow: 5,
     },
-    trimmedMeanPrice: 980000,
     relativeIqr: 0.2736,
     outliers: {
       lowerCount: 0,
@@ -61,4 +63,31 @@ test('enriched statistics payload structure matches expected domain model', asyn
   assert.ok(sampleStat.buyerReference.shopsAtOrBelow <= sampleStat.contributingShopCount)
   assert.ok(sampleStat.buyerReference.quantityAtOrBelow <= sampleStat.totalQuantity)
   assert.equal(sampleStat.depth[sampleStat.depth.length - 1].cumulativeQuantity, 15)
+  assert.equal(sampleStat.totalPriceLevelCount, 18)
+})
+
+test('ambiguous multi-item upgrade family selection does not show detailed analytics button without choosing specific level', async () => {
+  const asideContent = await readFile(new URL('../src/components/MarketAside.tsx', import.meta.url), 'utf8')
+  assert.match(
+    asideContent,
+    /isFamilyMultiSelection\s*=\s*Boolean\(isUpgradeFamily\s*&&\s*familyStats\s*&&\s*familyStats\.length\s*>\s*1\)/,
+    'MarketAside must identify ambiguous upgrade family multi-selection'
+  )
+  assert.match(
+    asideContent,
+    /hasAnalyticsData\s*=\s*Boolean\(stat\s*&&\s*!isFamilyMultiSelection\)/,
+    'hasAnalyticsData must be false when multi-selection is active without a concrete stat'
+  )
+
+  const appContent = await readFile(new URL('../src/App.tsx', import.meta.url), 'utf8')
+  assert.doesNotMatch(
+    appContent,
+    /stat=\{stat\s*\|\|\s*\(familyStats\s*&&\s*familyStats\[0\]\)\s*\|\|\s*null\}/,
+    'App.tsx must not use fallback to familyStats[0] for AnalyticsDrawer'
+  )
+  assert.match(
+    appContent,
+    /isOpen=\{isAnalyticsOpen\s*&&\s*stat\s*!=\s*null\}/,
+    'AnalyticsDrawer must only be open when stat is not null'
+  )
 })

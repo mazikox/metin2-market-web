@@ -36,6 +36,8 @@ export function MarketAnalytics({ stat, loading }: MarketAnalyticsProps) {
   const buyerRef = stat.buyerReference
   const percentiles = stat.percentiles
   const outliers = stat.outliers
+  const totalLevels = stat.totalPriceLevelCount ?? depth.length
+  const isDepthAggregated = stat.totalPriceLevelCount != null && stat.totalPriceLevelCount > depth.length
 
   // Maximum values for SVG scaling
   const maxBinCount = histogram.length > 0 ? Math.max(...histogram.map((b) => b.shopCount), 1) : 1
@@ -238,8 +240,12 @@ export function MarketAnalytics({ stat, loading }: MarketAnalyticsProps) {
               </div>
               <div className="kpi-card">
                 <span className="kpi-label">Liczba poziomów cenowych</span>
-                <span className="kpi-value">{depth.length}</span>
-                <span className="kpi-sub">od {formatCompact(stat.minimumPrice)} Yang</span>
+                <span className="kpi-value">{formatFull(totalLevels)}</span>
+                <span className="kpi-sub">
+                  {isDepthAggregated
+                    ? `zagregowane do ${depth.length} punktów z ${totalLevels} unikalnych cen`
+                    : `od ${formatCompact(stat.minimumPrice)} Yang`}
+                </span>
               </div>
             </div>
 
@@ -349,6 +355,11 @@ export function MarketAnalytics({ stat, loading }: MarketAnalyticsProps) {
         {/* ================= DATA TABLE TAB ================= */}
         {activeTab === 'table' && (
           <div className="analytics-view" role="tabpanel" aria-label="Tabela poziomów cenowych i podaży">
+            {isDepthAggregated && (
+              <div className="table-aggregation-note">
+                Tabela przedstawia {depth.length} punktów podaży zagregowanych z {totalLevels} unikalnych poziomów cenowych na rynku.
+              </div>
+            )}
             <div className="table-responsive">
               <table className="analytics-table">
                 <thead>

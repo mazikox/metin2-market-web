@@ -26,7 +26,8 @@ export function MarketAside({
   const buyerRef = stat?.buyerReference
   const percentiles = stat?.percentiles
   const outliers = stat?.outliers
-  const hasAnalyticsData = Boolean(stat || (familyStats && familyStats.length > 0))
+  const isFamilyMultiSelection = Boolean(isUpgradeFamily && familyStats && familyStats.length > 1)
+  const hasAnalyticsData = Boolean(stat && !isFamilyMultiSelection)
 
   return (
     <aside className="market-aside" aria-label="Podsumowanie statystyk rynku">
@@ -37,11 +38,11 @@ export function MarketAside({
       </div>
 
       {/* When upgrade family is selected with multiple items */}
-      {isUpgradeFamily && familyStats && familyStats.length > 1 ? (
+      {isFamilyMultiSelection && familyStats ? (
         <div className="aside-block">
           <h3 className="aside-title">Ceny wg poziomu ulepszenia</h3>
           <p className="caption">
-            Dla rodziny ulepszeń (+0...+9) ceny różnią się zależnie od poziomu. Kliknij poziom, aby zobaczyć szczegółową analizę cenową.
+            Dla rodziny ulepszeń (+0...+9) ceny różnią się zależnie od poziomu. Wybierz konkretny poziom, aby zobaczyć jego szczegółową analitykę i rozkład cen.
           </p>
           <div className="family-breakdown">
             {familyStats.map((item) => (
