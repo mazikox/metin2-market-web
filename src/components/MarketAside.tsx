@@ -1,63 +1,127 @@
 import { formatCompact, formatFull } from '../format'
+import type { ItemStatistic } from '../types'
 
-export interface AggregatedStats {
-  minimumPrice: number | null
-  medianPrice: number | null
-  meanPrice: number | null
-  contributingShopCount: number | null
-  totalQuantity: number | null
-}
+export const SMALL_SAMPLE_THRESHOLD = 10
 
 interface MarketAsideProps {
   selectionTitle: string
   selectionSubtitle: string
-  stats: AggregatedStats | null
+  stat: ItemStatistic | null
+  familyStats?: ItemStatistic[] | null
+  isUpgradeFamily?: boolean
+  onSelectLevel?: (vnum: number, name: string) => void
 }
 
 export function MarketAside({
   selectionTitle,
   selectionSubtitle,
-  stats,
+  stat,
+  familyStats,
+  isUpgradeFamily,
+  onSelectLevel,
 }: MarketAsideProps) {
+  const isSmallSample = stat ? stat.contributingShopCount < SMALL_SAMPLE_THRESHOLD : false
+  const buyerRef = stat?.buyerReference
+  const percentiles = stat?.percentiles
+  const outliers = stat?.outliers
+
   return (
-    <aside className="market-aside">
+    <aside className="market-aside" aria-label="Podsumowanie statystyk rynku">
       <div className="aside-block">
         <h3 className="aside-title">Wybrany przedmiot</h3>
         <div className="caption">{selectionSubtitle}</div>
         <div className="selection-chip">{selectionTitle}</div>
       </div>
 
-      <div className="aside-block">
-        <h3 className="aside-title">Statystyki ceny</h3>
-        <div className="stat-label">minimum za sztukę</div>
-        <div className="stat-feature">{stats ? formatCompact(stats.minimumPrice) : '—'}</div>
-        <div className="stat-label">Yang</div>
-
-        <div className="stats-grid">
-          <div>
-            <div className="stat-value">{stats ? formatCompact(stats.medianPrice) : '—'}</div>
-            <div className="stat-label">mediana</div>
-          </div>
-          <div>
-            <div className="stat-value">{stats ? formatCompact(stats.meanPrice) : '—'}</div>
-            <div className="stat-label">średnia</div>
-          </div>
-          <div>
-            <div className="stat-value">{stats ? formatFull(stats.contributingShopCount) : '—'}</div>
-            <div className="stat-label">sklepów</div>
-          </div>
-          <div>
-            <div className="stat-value">{stats ? formatFull(stats.totalQuantity) : '—'}</div>
-            <div className="stat-label">sztuk</div>
+      {/* When upgrade family is selected with multiple items */}
+      {isUpgradeFamily && familyStats && familyStats.length > 1 ? (
+        <div className="aside-block">
+          <h3 className="aside-title">Ceny wg poziomu ulepszenia</h3>
+          <p className="caption">
+            Dla rodziny ulepszeń (+0...+9) ceny różnią się zależnie od poziomu. Kliknij poziom, aby zobaczyć szczegółową analizę cenową.
+          </p>
+          <div className="family-breakdown">
+            {familyStats.map((item) => (
+              <button
+                key={item.vnum}
+                type="button"
+                className="family-level-card"
+                onClick={() => onSelectLevel?.(item.vnum, item.itemName)}
+              >
+                <div className="family-level-name">{item.itemName}</div>
+                <div className="family-level-price">od {formatCompact(item.minimumPrice)} Yang</div>
+                <div className="family-level-shops">{item.contributingShopCount} {item.contributingShopCount === 1 ? 'sklep' : 'sklepów'} · {item.totalQuantity} szt.</div>
+              </button>
+            ))}
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="aside-block">
+          <h3 className="aside-title">Statystyki ceny</h3>
+
+          {/* ATRAKCYJNA CENA (P20 benchmark) */}
+          <div className="stat-hero-block">
+            <div className="stat-label">Atrakcyjna cena (P20)</div>
+            <div className="stat-feature">
+              {buyerRef ? formatCompact(buyerRef.price) : stat ? formatCompact(stat.minimumPrice) : '—'}
+            </div>
+            <div className="stat-hero-note">
+              {buyerRef && stat
+                ? `P20 · ${buyerRef.shopsAtOrBelow} z ${stat.contributingShopCount} sklepów ma tę cenę lub niższą`
+                : 'Yang za sztukę'}
+            </div>
+          </div>
+
+          {isSmallSample && stat && (
+            <div className="aside-warning" role="note">
+              Mała próba rynku ({stat.contributingShopCount} {stat.contributingShopCount === 1 ? 'sklep' : 'sklepy'})
+            </div>
+          )}
+
+          <div className="stats-grid">
+            <div>
+              <div className="stat-value">{stat ? formatCompact(stat.minimumPrice) : '—'}</div>
+              <div className="stat-label">najniższa</div>
+            </div>
+
+            <div>
+              <div className="stat-value">{stat ? formatCompact(stat.medianPrice) : '—'}</div>
+              <div className="stat-label">typowa (mediana)</div>
+            </div>
+
+            <div>
+              <div className="stat-value">
+                {percentiles ? `${formatCompact(percentiles.p25)} – ${formatCompact(percentiles.p75)}` : '—'}
+              </div>
+              <div className="stat-label">typowy zakres (P25–P75)</div>
+            </div>
+
+            <div>
+              <div className="stat-value">
+                {buyerRef ? `${buyerRef.shopsAtOrBelow} skl. · ${buyerRef.quantityAtOrBelow} szt.` : '—'}
+              </div>
+              <div className="stat-label">do atrakcyjnej ceny</div>
+            </div>
+
+            <div>
+              <div className="stat-value">
+                {stat ? `${formatFull(stat.contributingShopCount)} skl. · ${formatFull(stat.totalQuantity)} szt.` : '—'}
+              </div>
+              <div className="stat-label">rynek (sklepy · sztuki)</div>
+            </div>
+
+            <div>
+              <div className="stat-value">{outliers ? outliers.totalCount : '—'}</div>
+              <div className="stat-label">odstające ceny</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="aside-block">
         <h3 className="aside-title">Jak interpretować wyniki</h3>
         <p className="caption">
-          Serwis pokazuje zapis rynku z konkretnego momentu. Możesz porównywać ceny,
-          ilości i bonusy, ale widoczna oferta nie musi nadal znajdować się w sklepie.
+          Ceny pochodzą z najnowszego opublikowanego skanu i stanowią ceny wystawienia. Serwis nie gromadzi historii transakcji, a oferta mogła zostać sprzedana.
         </p>
       </div>
     </aside>

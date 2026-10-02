@@ -61,15 +61,59 @@ export interface OffersResponse {
   totalElements: number
 }
 
+export interface PricePercentiles {
+  p10: number
+  p20: number
+  p25: number
+  p50: number
+  p75: number
+  p90: number
+}
+
+export interface OutlierSummary {
+  lowerCount: number
+  upperCount: number
+  totalCount: number
+}
+
+export interface BuyerReference {
+  percentile: number
+  price: number
+  shopsAtOrBelow: number
+  quantityAtOrBelow: number
+}
+
+export interface HistogramBin {
+  fromPrice: number
+  toPrice: number
+  shopCount: number
+}
+
+export interface DepthPoint {
+  price: number
+  quantityAtPrice: number
+  cumulativeQuantity: number
+  shopCountAtPrice: number
+  cumulativeShopCount: number
+}
+
 export interface ItemStatistic {
   vnum: number
   itemName: string
   minimumPrice: number
   meanPrice: number
+  trimmedMeanPrice?: number
   medianPrice: number
+  percentiles?: PricePercentiles
+  iqr?: number
+  relativeIqr?: number
   contributingShopCount: number
   rawOfferCount: number
   totalQuantity: number
+  outliers?: OutlierSummary
+  buyerReference?: BuyerReference
+  histogram?: HistogramBin[]
+  depth?: DepthPoint[]
 }
 
 export interface StatisticsResponse {

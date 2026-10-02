@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ApiError, serverApis } from './api'
-import type { ItemSuggestion, MarketOffer } from './types'
+import type { ItemStatistic, ItemSuggestion, MarketOffer } from './types'
 import { Header, type ApiStatus } from './components/Header'
 import { Hero } from './components/Hero'
 import { SearchSection } from './components/SearchSection'
 import { ListingItem } from './components/ListingItem'
-import { MarketAside, type AggregatedStats } from './components/MarketAside'
+import { MarketAside } from './components/MarketAside'
+import { MarketAnalytics } from './components/MarketAnalytics'
 import { Manifesto } from './components/Manifesto'
 import { Footer } from './components/Footer'
 import { ItemDrawer } from './components/ItemDrawer'
@@ -36,7 +37,9 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [marketError, setMarketError] = useState<string | null>(null)
   const [retryVersion, setRetryVersion] = useState(0)
-  const [stats, setStats] = useState<AggregatedStats | null>(null)
+  const [stat, setStat] = useState<ItemStatistic | null>(null)
+  const [familyStats, setFamilyStats] = useState<ItemStatistic[] | null>(null)
+  const [statsLoading, setStatsLoading] = useState(false)
   const [suggestions, setSuggestions] = useState<ItemSuggestion[]>([])
   const [activeDrawerItem, setActiveDrawerItem] = useState<MarketOffer | null>(null)
   const [activeSection, setActiveSection] = useState<ActiveSection>(null)
@@ -100,27 +103,6 @@ export default function App() {
     }
   }, [])
 
-  // Compute local statistics when the statistics endpoint is unavailable.
-  const computeLocalStats = useCallback((items: MarketOffer[]): AggregatedStats | null => {
-    const prices = items
-      .map((i) => Number(i.unitPrice))
-      .filter(Number.isFinite)
-      .sort((a, b) => a - b)
-
-    if (!prices.length) return null
-
-    const mid = Math.floor(prices.length / 2)
-    const median = prices.length % 2 !== 0 ? prices[mid] : (prices[mid - 1] + prices[mid]) / 2
-
-    return {
-      minimumPrice: prices[0],
-      meanPrice: prices.reduce((a, b) => a + b, 0) / prices.length,
-      medianPrice: median,
-      contributingShopCount: new Set(items.map((i) => i.shop?.vid || i.shop?.title)).size,
-      totalQuantity: items.reduce((s, i) => s + (Number(i.totalQuantity) || Number(i.quantity) || 0), 0),
-    }
-  }, [])
-
   // Use the actual offers request as the source of API status.
   const loadData = useCallback(async (
     currentQuery: string,
@@ -132,7 +114,9 @@ export default function App() {
     setMarketError(null)
     setRawItems([])
     setTotalElements(0)
-    setStats(null)
+    setStat(null)
+    setFamilyStats(null)
+
     try {
       const data = await api.offers({
         query: currentQuery,
@@ -149,48 +133,42 @@ export default function App() {
       setMarketError(null)
       setRawItems(items)
       setTotalElements(data.totalElements ?? items.length)
-      // Offers are ready to use; optional statistics must not keep the results blocked.
-      setStats(computeLocalStats(items))
       setLoading(false)
 
       const statsVnums = currentVnums.length > 0
         ? currentVnums
-        : [...new Set(items.map((i) => i.vnum))].slice(0, 100)
+        : [...new Set(items.map((i) => i.vnum))].slice(0, 50)
 
       if (statsVnums.length > 0) {
+        setStatsLoading(true)
         try {
           const statsData = await api.statistics(statsVnums, signal)
           if (signal.aborted) return
           const rows = statsData.items || []
           if (rows.length === 1) {
-            const r = rows[0]
-            setStats({
-              minimumPrice: r.minimumPrice,
-              meanPrice: r.meanPrice,
-              medianPrice: r.medianPrice,
-              contributingShopCount: r.contributingShopCount,
-              totalQuantity: r.totalQuantity,
-            })
+            setStat(rows[0])
+            setFamilyStats(null)
           } else if (rows.length > 1) {
-            const mins = rows.map((r) => Number(r.minimumPrice)).filter(Number.isFinite)
-            const means = rows.map((r) => Number(r.meanPrice)).filter(Number.isFinite)
-            const medians = rows.map((r) => Number(r.medianPrice)).filter(Number.isFinite)
-            setStats({
-              minimumPrice: Math.min(...mins),
-              meanPrice: means.reduce((a, b) => a + b, 0) / means.length,
-              medianPrice: medians.sort((a, b) => a - b)[Math.floor(medians.length / 2)],
-              contributingShopCount: rows.reduce((s, r) => s + Number(r.contributingShopCount || 0), 0),
-              totalQuantity: rows.reduce((s, r) => s + Number(r.totalQuantity || 0), 0),
-            })
+            setFamilyStats(rows)
+            if (currentVnums.length === 1) {
+              setStat(rows.find((r) => r.vnum === currentVnums[0]) || rows[0])
+            } else {
+              setStat(null)
+            }
           } else {
-            setStats(computeLocalStats(items))
+            setStat(null)
+            setFamilyStats(null)
           }
         } catch {
           if (signal.aborted) return
-          setStats(computeLocalStats(items))
+          setStat(null)
+          setFamilyStats(null)
+        } finally {
+          if (!signal.aborted) setStatsLoading(false)
         }
       } else {
-        setStats(computeLocalStats(items))
+        setStat(null)
+        setFamilyStats(null)
       }
     } catch (error) {
       if (signal.aborted) return
@@ -200,11 +178,12 @@ export default function App() {
         : 'Nie udało się pobrać ofert. Spróbuj ponownie.')
       setRawItems([])
       setTotalElements(0)
-      setStats(null)
+      setStat(null)
+      setFamilyStats(null)
     } finally {
       if (!signal.aborted) setLoading(false)
     }
-  }, [api, computeLocalStats, requestId, searchId])
+  }, [api, requestId, searchId])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -260,6 +239,18 @@ export default function App() {
     setPage(0)
   }
 
+  const handleSelectLevel = (levelVnum: number, levelName: string) => {
+    setSearchId(crypto.randomUUID())
+    if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
+    suggestionControllerRef.current?.abort()
+    setSuggestions([])
+    setInputQuery(levelName)
+    setQuery(levelName)
+    setVnums([levelVnum])
+    setActiveSuggestion(null)
+    setPage(0)
+  }
+
   // Filter and sort items
   const displayedItems = useMemo(() => {
     let list = [...rawItems]
@@ -279,6 +270,7 @@ export default function App() {
     return [...new Set(rawItems.map((i) => i.shop?.mapId).filter(Boolean) as string[])]
   }, [rawItems])
 
+  const isUpgradeFamily = activeSuggestion?.kind === 'UPGRADE_FAMILY' || (vnums.length > 1)
   const maxPage = Math.ceil(totalElements / PAGE_SIZE) - 1
   const closeDrawer = useCallback(() => setActiveDrawerItem(null), [])
 
@@ -310,6 +302,8 @@ export default function App() {
 
           <div className="market-layout">
             <div className={`results-pane ${loading ? 'results-pane--loading' : ''}`} aria-busy={loading}>
+              {stat && <MarketAnalytics stat={stat} loading={statsLoading} />}
+
               <div className="toolbar">
                 <div className="filters">
                   <label className="field">
@@ -403,7 +397,10 @@ export default function App() {
                   ? `Filtr VNUM: ${vnums.join(', ')}.`
                   : 'Wyniki dopasowane po nazwie przedmiotu.'
               }
-              stats={stats}
+              stat={stat}
+              familyStats={familyStats}
+              isUpgradeFamily={isUpgradeFamily}
+              onSelectLevel={handleSelectLevel}
             />
           </div>
         </section>
@@ -417,7 +414,6 @@ export default function App() {
         item={activeDrawerItem}
         onClose={closeDrawer}
       />
-
     </>
   )
 }
