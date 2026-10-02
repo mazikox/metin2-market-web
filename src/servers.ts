@@ -19,9 +19,6 @@ export function hasSelectedServer() {
 }
 
 export function getServerUrl(serverId: GameServerId) {
-  if (typeof window === 'undefined') return `/?server=${serverId}`
-  const url = new URL(window.location.href)
-  url.pathname = '/'
-  url.searchParams.set('server', serverId)
-  return url.pathname + url.search + url.hash
+  return `/?server=${serverId}`
 }
+

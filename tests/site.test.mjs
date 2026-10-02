@@ -87,20 +87,49 @@ test('server selection helper functions handle known, unknown, and empty server 
     assert.equal(hasSelectedServer(), false, 'Unknown server param should return false')
     assert.equal(getServerUrl('pandora'), '/?server=pandora', 'Replaces unknown server with pandora')
 
-    // 4. Unknown server with extra query params
+    // 4. Unknown server with extra query params (must not carry over foreign params)
     globalThis.window = {
-      location: new URL('https://metin2bazar.pl/?server=invalid&ref=test'),
+      location: new URL('https://metin2bazar.pl/?server=invalid&ref=test&utm_source=metin'),
     }
     assert.equal(hasSelectedServer(), false, 'Invalid server param should return false')
-    assert.equal(getServerUrl('pandora'), '/?server=pandora&ref=test', 'Replaces invalid server param while keeping other params')
+    assert.equal(getServerUrl('pandora'), '/?server=pandora', 'Does not carry over foreign query params')
 
-    // 5. Valid servers
+    // 5. Multiple server query parameters
+    globalThis.window = {
+      location: new URL('https://metin2bazar.pl/?server=pandora&server=elder'),
+    }
+    assert.equal(hasSelectedServer(), true, 'First server param is pandora (valid)')
+    assert.equal(getSelectedServer().id, 'pandora', 'First server param determines selected server')
+    assert.equal(getServerUrl('elder'), '/?server=elder', 'Produces clean URL for elder without duplicate server params')
+
+    globalThis.window = {
+      location: new URL('https://metin2bazar.pl/?server=unknown&server=pandora'),
+    }
+    assert.equal(hasSelectedServer(), false, 'First server param is unknown (invalid)')
+    assert.equal(getSelectedServer().id, 'pandora', 'Fallback default server is pandora')
+    assert.equal(getServerUrl('pandora'), '/?server=pandora')
+
+    globalThis.window = {
+      location: new URL('https://metin2bazar.pl/?server=&server=elder'),
+    }
+    assert.equal(hasSelectedServer(), false, 'First server param is empty (invalid)')
+    assert.equal(getSelectedServer().id, 'pandora', 'Fallback default server is pandora')
+    assert.equal(getServerUrl('elder'), '/?server=elder')
+
+    globalThis.window = {
+      location: new URL('https://metin2bazar.pl/?server=beavium&server=unknown'),
+    }
+    assert.equal(hasSelectedServer(), true, 'First server param is beavium (valid)')
+    assert.equal(getSelectedServer().id, 'beavium', 'Selected server is beavium')
+
+    // 6. Valid servers
     for (const s of GAME_SERVERS) {
       globalThis.window = {
         location: new URL(`https://metin2bazar.pl/?server=${s.id}`),
       }
       assert.equal(hasSelectedServer(), true, `Server ${s.id} should return true`)
       assert.equal(getSelectedServer().id, s.id, `Server ${s.id} should be selected`)
+      assert.equal(getServerUrl(s.id), `/?server=${s.id}`)
     }
   } finally {
     globalThis.window = originalWindow

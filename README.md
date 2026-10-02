@@ -57,3 +57,12 @@ osobno dla serwera i originu; nie przenoszą się automatycznie pomiędzy domena
 Podstrony są generowane do public i kopiowane do dist. Caddy obsługuje ich index.html
 oraz prawdziwe 404 bez fallbacku dowolnego URL na katalog. Nazwy projektów, paczek Java
 oraz klucze ulubionych zachowano dla zgodności. Nie są odnośnikami do starej domeny.
+
+## Smoke test i weryfikacja routingu Caddy
+
+Aby wykluczyć rozjechanie się konfiguracji routingu Caddy z frontendowym buildem, wdrożono zautomatyzowany test HTTP:
+- `npm run smoke-test` (lub `node scripts/smoke-test.mjs [origin]`):
+  - Sprawdza kody HTTP, liczbę i zawartość tagów `<link rel="canonical">` oraz tytuły `<title>` przed wykonaniem JS dla `/`, `/?server=pandora`, `/?server=elder`, `/?server=beavium`, `/?server=unknown`.
+  - Weryfikuje, że `/elder` oraz `/beavium` zwracają rzeczywisty kod HTTP 404.
+  - Został wpięty w proces CI/CD w obu repozytoriach po wdrożeniu (`metin2-market-web` oraz `metin2-market-api`).
+

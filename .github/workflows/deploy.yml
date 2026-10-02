@@ -76,3 +76,7 @@ jobs:
 
             rm -rf ~/frontend-release
           '
+
+      - name: Verify routing and canonical smoke test
+        run: npm run smoke-test -- https://metin2bazar.pl
+
