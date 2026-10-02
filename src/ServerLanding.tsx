@@ -1,6 +1,27 @@
+import { useEffect } from 'react'
 import { GAME_SERVERS, getServerUrl } from './servers'
+import { Footer } from './components/Footer'
+import site from './site.json'
 
 export default function ServerLanding() {
+  useEffect(() => {
+    const title = `${site.name} | ceny i oferty z rynków Metin2`
+    const description = site.description
+    const canonical = site.url + '/'
+    document.title = title
+    document.querySelector('meta[name="description"]')?.setAttribute('content', description)
+    let canonicalLink = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link')
+      canonicalLink.rel = 'canonical'
+      document.head.appendChild(canonicalLink)
+    }
+    canonicalLink.href = canonical
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', title)
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', description)
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonical)
+  }, [])
+
   return (
     <>
       <a className="skip-link" href="#main-content">Przejdź do wyboru serwera</a>
@@ -36,6 +57,7 @@ export default function ServerLanding() {
           ))}
         </div>
       </main>
+      <Footer />
     </>
   )
 }
