@@ -45,13 +45,12 @@ export default function App() {
   const suggestionControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
-    const title = `Rynek Metin2 ${server.name} — ${site.name}`
+    const title = `Rynek Metin2 ${server.name} | ${site.name}`
     const description = `Porównuj ceny, bonusy i lokalizacje przedmiotów na serwerze ${server.name}. Przeglądaj oferty z opublikowanych skanów rynku Metin2.`
-    const canonical = site.url + (server.id === 'pandora' ? '/' : '/?server=' + server.id)
+    const canonical = site.url + '/?server=' + server.id
     document.title = title
     document.querySelector('meta[name="description"]')?.setAttribute('content', description)
-    // The shared HTML cannot know which server query is requested.
-    // Inject one canonical instead of changing a conflicting value in the HTML.
+    // Keep the canonical in the shared HTML aligned with the selected server.
     let canonicalLink = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
     if (!canonicalLink) {
       canonicalLink = document.createElement('link')

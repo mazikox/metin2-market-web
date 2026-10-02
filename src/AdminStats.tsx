@@ -12,7 +12,7 @@ export default function AdminStats() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   useEffect(() => {
-    document.title = 'Statystyki katalogu — Metin2 Bazar'
+    document.title = 'Statystyki katalogu | Metin2 Bazar'
     const robots = document.createElement('meta'); robots.name = 'robots'; robots.content = 'noindex,nofollow'; document.head.append(robots)
     return () => robots.remove()
   }, [])

@@ -19,7 +19,7 @@ export function Header({ apiStatus, currentServer, activeSection }: HeaderProps)
   return (
     <header className="site-header">
       <div className="shell topbar">
-        <a href="#" className="brand" aria-label="Metin2 Bazar — powrót do góry">
+        <a href="/" className="brand" aria-label="Metin2 Bazar, strona główna">
           <img src="/favicon.png" alt="" className="brand-logo" width="26" height="26" />
           METIN2 <span>BAZAR</span>
         </a>

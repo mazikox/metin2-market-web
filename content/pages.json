@@ -29,7 +29,7 @@
     "eyebrow": "Przewodnik",
     "title": "Znajdź ofertę. Zrozum dane.",
     "description": "Jak wyszukiwać przedmioty w Metin2 Bazar, porównywać oferty i odczytywać dane ze skanów rynku.",
-    "intro": "Trzy kroki do porównania ofert — i kilka wskazówek, które pomogą właściwie odczytać wyniki.",
+    "intro": "Trzy kroki do porównania ofert i kilka wskazówek, które pomogą właściwie odczytać wyniki.",
     "sections": [
       {
         "id": "wyszukiwanie",
@@ -117,7 +117,7 @@
         "title": "Dane z gry",
         "paragraphs": [
           "Katalog pochodzi ze skanów publicznego rynku gry: zawiera przedmioty, ceny, bonusy, nazwy sklepów, lokalizacje w grze i czas obserwacji. Lokalizacja sklepu nie oznacza miejsca pobytu gracza. Dane ofert przechowujemy tak długo, jak służą prezentowaniu katalogu i historii cen; nie obejmuje ich termin usuwania statystyk odwiedzin.",
-          "Jeżeli nazwa sklepu lub treść oferty pozwala Cię zidentyfikować, możesz zgłosić to administratorowi. Takie dane pochodzą z rynku gry, a ich prezentacja służy porównywaniu ofert — na podstawie prawnie uzasadnionego interesu (art. 6 ust. 1 lit. f RODO). Możesz zgłosić sprzeciw lub żądać usunięcia danych."
+          "Jeżeli nazwa sklepu lub treść oferty pozwala Cię zidentyfikować, możesz zgłosić to administratorowi. Takie dane pochodzą z rynku gry, a ich prezentacja służy porównywaniu ofert na podstawie prawnie uzasadnionego interesu (art. 6 ust. 1 lit. f RODO). Możesz zgłosić sprzeciw lub żądać usunięcia danych."
         ]
       },
       {
@@ -140,7 +140,7 @@
         "id": "prawa",
         "title": "Twoje prawa",
         "paragraphs": [
-          "Na zasadach określonych w RODO możesz żądać dostępu do danych, ich sprostowania, usunięcia i ograniczenia przetwarzania. Możesz sprzeciwić się przetwarzaniu opartemu na uzasadnionym interesie, a gdy spełnione są warunki — żądać przeniesienia danych.",
+          "Na zasadach określonych w RODO możesz żądać dostępu do danych, ich sprostowania, usunięcia i ograniczenia przetwarzania. Możesz sprzeciwić się przetwarzaniu opartemu na uzasadnionym interesie, a gdy spełnione są warunki, żądać przeniesienia danych.",
           "Napisz do administratora wskazanego poniżej. Możesz również złożyć skargę do Prezesa UODO. Nie podejmujemy wobec Ciebie zautomatyzowanych decyzji wywołujących skutki prawne lub podobnie istotnie wpływających na Twoją sytuację."
         ]
       },

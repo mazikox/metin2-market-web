@@ -11,9 +11,13 @@ export function getSelectedServer() {
   return GAME_SERVERS.find((server) => server.id === selected) ?? GAME_SERVERS[0]
 }
 
+export function hasSelectedServer() {
+  const selected = new URLSearchParams(window.location.search).get('server')
+  return GAME_SERVERS.some((server) => server.id === selected)
+}
+
 export function getServerUrl(serverId: GameServerId) {
   const url = new URL(window.location.href)
-  if (serverId === 'pandora') url.searchParams.delete('server')
-  else url.searchParams.set('server', serverId)
+  url.searchParams.set('server', serverId)
   return url.pathname + url.search + url.hash
 }

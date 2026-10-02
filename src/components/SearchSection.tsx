@@ -22,13 +22,13 @@ interface QuickSearchItem {
 
 const HARD_SERVER_QUICK_SEARCHES: QuickSearchItem[] = [
   { label: 'FMS', query: 'Miecz Pełni Księżyca' },
-  { label: 'RIB', query: 'Ostrze z Czerwonej Stali' },
+  { label: 'Ostrze Z Czerw. Stali', query: 'Ostrze z Czerwonej Stali' },
   { label: 'Zaczarowanie', query: 'Zaczarowanie Przedmiotu' },
   { label: 'Bodzio', query: 'Zwój Błogosławieństwa' },
   { label: 'Kamień Duchowy', query: 'Kamień Duchowy' },
   { label: 'Rada', query: 'Rada Pustelnika' },
   { label: 'Egzo', query: 'Zwój Egzorcyzmu' },
-  { label: 'Kupon SM 1000', query: 'Kupon SM 1000' },
+  { label: 'Kupon SM', query: 'Kupon SM' },
   { label: 'Ostatni skan', query: '' },
 ]
 

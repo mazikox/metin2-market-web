@@ -56,4 +56,4 @@ osobno dla serwera i originu; nie przenoszą się automatycznie pomiędzy domena
 
 Podstrony są generowane do public i kopiowane do dist. Caddy obsługuje ich index.html
 oraz prawdziwe 404 bez fallbacku dowolnego URL na katalog. Nazwy projektów, paczek Java
-oraz klucze ulubionych zachowano dla zgodności — nie są odnośnikami do starej domeny.
+oraz klucze ulubionych zachowano dla zgodności. Nie są odnośnikami do starej domeny.
