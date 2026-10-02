@@ -1,68 +1,199 @@
 # Metin2 Bazar
 
-Frontend katalogu ofert Metin2: Pandora, Elder i Beavium.
-Adres docelowy: `https://metin2bazar.pl`.
+A production web application for searching and comparing Metin2 marketplace listings across **Pandora**, **Elder**, and **Beavium**.
 
-## Uruchomienie
+**Live:** [metin2bazar.pl](https://metin2bazar.pl) · **Backend:** [mazikox/metin2-market-api](https://github.com/mazikox/metin2-market-api)
 
-Skopiuj `.env.example` do `.env` i uruchom `npm install`, następnie `npm run dev`.
-`VITE_API_BASE_URL=/backend` oznacza API pod tym samym originem co witryna.
-Deweloperski proxy kieruje zapytania na `VITE_API_PROXY_TARGET`, domyślnie
-`http://127.0.0.1:8080`. Może to być lokalny backend lub lokalny tunel SSH do VPS.
+[![Deploy frontend](https://github.com/mazikox/metin2-market-web/actions/workflows/deploy.yml/badge.svg)](https://github.com/mazikox/metin2-market-web/actions/workflows/deploy.yml)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
 
-`npm run build` tworzy `dist`; `npm run preview` pokazuje ten build, ale proxy API
-produkcyjnego obsługuje Caddy, a nie sam serwer preview.
+> Independent community project. Not affiliated with Gameforge.
 
-## Publikacja i dwa adresy
+## Why this project
 
-Obie domeny korzystają z jednego katalogu `/var/www/metin2bazar` i tej samej bazy.
-Nowa domena jest adresem kanonicznym i ma sitemapę. Dotychczasowy adres jest
-obsługiwany jako nieindeksowane lustro przez konfigurację Caddy w repo API:
-`ops/Caddyfile`. Stare domeny pozostają wyłącznie w konfiguracji kompatybilności.
-Instrukcja uruchomienia i DNS: `E:/metin-market-api/docs/uruchomienie-metin2bazar.md`.
-Nowy katalog publikacji należy utworzyć z uprawnieniami użytkownika wdrożeniowego
-przed uruchomieniem workflow. Workflow wykonuje testy, build i publikację plików;
-nie aktywuje konfiguracji Caddy ani DNS.
+Checking item prices manually across Metin2 shops is slow and makes it difficult to compare offers consistently. Metin2 Bazar turns market scan data into a searchable catalog where players can compare prices, quantities, bonuses, shop locations, and price statistics in one place.
 
-## Podstrony i SEO
+The project is deployed as a real production service rather than a static portfolio demo. It includes a separate backend, PostgreSQL persistence, reverse-proxy routing, technical SEO, CI/CD, post-deployment smoke tests, and privacy-conscious usage statistics.
 
-`src/site.json` zawiera markę, canonical origin, flagę `indexable` i ustawienia analityki.
-`content/pages.json` zawiera treści podstron. `scripts/generate-site.mjs` generuje
-statyczne podstrony, 404, robots i sitemapę przed buildem. W trybie `predev` argument
-`--noindex` wyłącza sitemapę oraz skrypt analityczny. Po zmianie treści podczas pracy
-z Vite uruchom `node scripts/generate-site.mjs --noindex`.
+## Product features
 
-Produkcyjny build jest przeznaczony dla metin2bazar.pl. `indexable: true` umożliwia
-indeksowanie nowej domeny. Caddy na starym adresie dodaje `X-Robots-Tag: noindex`,
-nie udostępnia sitemapy i daje robots bez odsyłacza do sitemapy. Crawling pozostaje
-dozwolony, żeby robot mógł odczytać noindex. Nie blokuje to publicznego dostępu.
-Lokalny Vite dodaje noindex do katalogu niezależnie od konfiguracji produkcyjnej.
+- **Multi-server marketplace** — separate catalogs for Pandora, Elder, and Beavium.
+- **Fast item search** — API-backed suggestions, exact VNUM families, and debounced requests.
+- **Offer comparison** — unit prices, quantities, bonuses, shop data, channel/map information, and observation timestamps.
+- **Market statistics** — minimum, mean, and median prices with a local fallback when the statistics endpoint is unavailable.
+- **Sorting and filtering** — price, quantity, and map filtering for the currently loaded results.
+- **Saved searches** — favorites stored locally per server.
+- **Resilient network UX** — request cancellation, timeouts, retry handling, stale-request protection, and user-facing API states.
+- **Responsive and accessible UI** — keyboard-friendly navigation, skip links, semantic labels, and mobile navigation.
 
-## Statystyki katalogu
+## Engineering highlights
 
-Frontend oznacza pobrania wyników tokenem żądania przechowywanym tylko w pamięci.
-Token pojedynczej akcji wyszukiwania powstaje dopiero po submit/wyborze podpowiedzi.
-Retry używa tych samych tokenów; paginacja nie jest nowym wyszukiwaniem.
-Nie używamy cookies, localStorage ani identyfikatora przeglądarki do analytics.
-Prywatny panel `/admin/stats` używa `/backend/api/v1/admin/stats` na tej samej domenie.
-Caddy zabezpiecza obie ścieżki przez basic_auth. Instrukcja VPS: `docs/statystyki-katalogu.md` w repo API.
+### Server-aware routing and SEO
 
-## Funkcje i testy
+The public homepage is a server selector, while each market has its own canonical URL:
 
-`npm test` sprawdza timeouty, anulowanie, odczyt błędów i odzyskanie klienta API po błędzie.
-Sortowanie i filtr mapy obejmują pobraną stronę. Oferty pochodzą z opublikowanego skanu;
-stan połączenia API nie oznacza aktualności oferty. Ulubione zapisują się w localStorage
-osobno dla serwera i originu; nie przenoszą się automatycznie pomiędzy domenami.
+```text
+/                    -> server selection
+/?server=pandora     -> Pandora market
+/?server=elder       -> Elder market
+/?server=beavium     -> Beavium market
+```
 
-Podstrony są generowane do public i kopiowane do dist. Caddy obsługuje ich index.html
-oraz prawdziwe 404 bez fallbacku dowolnego URL na katalog. Nazwy projektów, paczek Java
-oraz klucze ulubionych zachowano dla zgodności. Nie są odnośnikami do starej domeny.
+The production build generates server-specific HTML entry points so crawlers receive the correct `<title>`, description, Open Graph metadata, and canonical URL **before JavaScript executes**. Caddy maps the public query-string routes to those generated documents.
 
-## Smoke test i weryfikacja routingu Caddy
+The site also ships with:
 
-Aby wykluczyć rozjechanie się konfiguracji routingu Caddy z frontendowym buildem, wdrożono zautomatyzowany test HTTP:
-- `npm run smoke-test` (lub `node scripts/smoke-test.mjs [origin]`):
-  - Sprawdza kody HTTP, liczbę i zawartość tagów `<link rel="canonical">` oraz tytuły `<title>` przed wykonaniem JS dla `/`, `/?server=pandora`, `/?server=elder`, `/?server=beavium`, `/?server=unknown`.
-  - Weryfikuje, że `/elder` oraz `/beavium` zwracają rzeczywisty kod HTTP 404.
-  - Został wpięty w proces CI/CD w obu repozytoriach po wdrożeniu (`metin2-market-web` oraz `metin2-market-api`).
+- generated `robots.txt` and `sitemap.xml`,
+- canonical URLs for indexable pages,
+- real HTTP 404 responses instead of an SPA fallback for unknown paths,
+- static information/privacy pages,
+- a noindex compatibility mirror for the previous domain,
+- automated raw-HTTP checks for routing and canonical metadata.
 
+### Production CI/CD
+
+Every push to `main` runs the frontend deployment pipeline:
+
+1. install dependencies,
+2. run automated tests,
+3. build the production bundle,
+4. publish the release to the VPS,
+5. run a production smoke test against `https://metin2bazar.pl`.
+
+The backend repository manages the Spring Boot service and production Caddy configuration, including validation, reloads, health checks, and routing verification.
+
+### Privacy-conscious analytics
+
+Catalog usage statistics are collected without third-party analytics scripts, advertising trackers, cookies, or persistent analytics identifiers. Search/result request tokens exist only for the lifetime of an in-memory action. Favorites are a separate user-facing feature stored locally in the browser.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Scanner["Market scanners"] -->|authenticated imports| API["Spring Boot API"]
+    API --> DB[("PostgreSQL")]
+    Browser["Browser"] -->|static app| Caddy["Caddy"]
+    Browser -->|/backend/api/...| Caddy
+    Caddy --> API
+    Caddy --> Static["React + Vite build"]
+    Actions["GitHub Actions"] -->|deploy + smoke tests| VPS["Production VPS"]
+    VPS --- Caddy
+```
+
+The frontend and backend are intentionally separated:
+
+- this repository owns the **React application, SEO generation, frontend tests, and frontend deployment**;
+- [metin2-market-api](https://github.com/mazikox/metin2-market-api) owns the **Spring Boot API, PostgreSQL/Flyway model, protected scanner imports, Caddy configuration, and backend deployment**.
+
+## Tech stack
+
+| Area | Technology |
+| --- | --- |
+| Frontend | React 18, TypeScript, Vite 5 |
+| Backend | Spring Boot 4.1.1, Java 26 |
+| Database | PostgreSQL, Flyway |
+| Infrastructure | Caddy, Docker, Linux VPS |
+| CI/CD | GitHub Actions, SSH deployment |
+| Testing | Node test runner, backend integration tests with Testcontainers, production HTTP smoke tests |
+| SEO | server-specific pre-rendered metadata, canonical URLs, sitemap, robots, real 404s |
+
+## Frontend structure
+
+```text
+src/
+├── components/          reusable UI components
+├── App.tsx              marketplace application
+├── ServerLanding.tsx    server selection landing page
+├── api.ts               API client, cancellation and timeout handling
+├── servers.ts           server routing helpers
+├── useFavorites.ts      per-server browser favorites
+└── styles.css           application styling
+
+content/                  static information-page content
+scripts/
+├── generate-site.mjs    static pages, robots.txt and sitemap generation
+└── smoke-test.mjs       production routing/SEO smoke test
+tests/                    frontend and generated-site tests
+vite.config.ts            build-time server HTML generation
+```
+
+## Run locally
+
+### Requirements
+
+- Node.js 22+
+- npm
+- optional: the backend running locally on port `8080`
+
+### Setup
+
+```bash
+git clone https://github.com/mazikox/metin2-market-web.git
+cd metin2-market-web
+npm ci
+cp .env.example .env
+npm run dev
+```
+
+By default, development requests to `/backend` are proxied to:
+
+```text
+http://127.0.0.1:8080
+```
+
+You can override the backend target in `.env`:
+
+```env
+VITE_API_BASE_URL=/backend
+VITE_API_PROXY_TARGET=http://127.0.0.1:8080
+```
+
+## Tests and build
+
+Run the frontend test suite:
+
+```bash
+npm test
+```
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+Preview the generated bundle:
+
+```bash
+npm run preview
+```
+
+Run the raw HTTP production smoke test:
+
+```bash
+npm run smoke-test -- https://metin2bazar.pl
+```
+
+The smoke test verifies the public market routes, HTTP status codes, titles, and canonical URLs before client-side JavaScript is executed.
+
+## Data model and freshness
+
+Listings come from published market scans. A result represents an **observed offer**, not a guarantee that the shop is still active at the moment the page is viewed.
+
+The backend keeps server data isolated and exposes server-specific search, suggestion, and statistics endpoints. Scanner imports are authenticated and deduplicated before observations are persisted.
+
+## Related repository
+
+### [metin2-market-api](https://github.com/mazikox/metin2-market-api)
+
+Spring Boot / Java backend responsible for:
+
+- authenticated market-scan imports,
+- server-specific search APIs,
+- price statistics,
+- PostgreSQL persistence and Flyway migrations,
+- protected private catalog statistics,
+- Caddy production routing,
+- Docker-based deployment and integration tests.
