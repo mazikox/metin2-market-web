@@ -1093,6 +1093,72 @@ aside.market-aside {
   color: var(--muted);
 }
 
+.aside-analytics-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 15px;
+  background: linear-gradient(145deg, rgba(196, 154, 90, 0.08), rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--accent);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: border-color 0.2s cubic-bezier(0.23, 1, 0.32, 1), background 0.2s cubic-bezier(0.23, 1, 0.32, 1), transform 0.12s ease-out;
+}
+
+.aside-analytics-trigger:hover {
+  border-color: var(--accent);
+  background: linear-gradient(145deg, rgba(196, 154, 90, 0.16), rgba(255, 255, 255, 0.05));
+}
+
+.aside-analytics-trigger:active {
+  transform: scale(0.98);
+}
+
+.aside-analytics-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.aside-analytics-trigger__content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.aside-analytics-trigger__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.aside-analytics-trigger:hover .aside-analytics-trigger__title {
+  color: var(--accent);
+}
+
+.aside-analytics-trigger__desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.aside-analytics-trigger__arrow {
+  font-size: 16px;
+  color: var(--accent);
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+  flex-shrink: 0;
+}
+
+.aside-analytics-trigger:hover .aside-analytics-trigger__arrow {
+  transform: translateX(4px);
+}
+
 .caption {
   font-size: 12px;
   color: var(--muted);
@@ -1498,8 +1564,24 @@ footer.site-footer {
   box-shadow: -16px 0 48px rgba(0, 0, 0, 0.5);
 }
 
+.drawer--wide {
+  width: min(820px, 100%);
+}
+
 .drawer-backdrop.open .drawer {
   transform: translateX(0);
+}
+
+.drawer .analytics-drawer-body {
+  margin-top: 8px;
+}
+
+.drawer .market-analytics {
+  margin: 0;
+  padding: 12px 0 32px;
+  background: transparent;
+  border: 0;
+  border-left: 0;
 }
 
 .drawer-top {

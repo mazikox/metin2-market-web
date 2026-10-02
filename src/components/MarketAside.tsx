@@ -10,6 +10,7 @@ interface MarketAsideProps {
   familyStats?: ItemStatistic[] | null
   isUpgradeFamily?: boolean
   onSelectLevel?: (vnum: number, name: string) => void
+  onOpenAnalytics?: () => void
 }
 
 export function MarketAside({
@@ -19,11 +20,13 @@ export function MarketAside({
   familyStats,
   isUpgradeFamily,
   onSelectLevel,
+  onOpenAnalytics,
 }: MarketAsideProps) {
   const isSmallSample = stat ? stat.contributingShopCount < SMALL_SAMPLE_THRESHOLD : false
   const buyerRef = stat?.buyerReference
   const percentiles = stat?.percentiles
   const outliers = stat?.outliers
+  const hasAnalyticsData = Boolean(stat || (familyStats && familyStats.length > 0))
 
   return (
     <aside className="market-aside" aria-label="Podsumowanie statystyk rynku">
@@ -115,6 +118,29 @@ export function MarketAside({
               <div className="stat-label">odstające ceny</div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Szczegółowa analityka trigger button placed right above 'Jak interpretować wyniki' */}
+      {hasAnalyticsData && (
+        <div className="aside-block">
+          <h3 className="aside-title">Szczegółowa analityka</h3>
+          <button
+            type="button"
+            className="aside-analytics-trigger"
+            onClick={onOpenAnalytics}
+            aria-haspopup="dialog"
+          >
+            <div className="aside-analytics-trigger__content">
+              <span className="aside-analytics-trigger__title">Rozkład i głębokość rynku</span>
+              <span className="aside-analytics-trigger__desc">
+                Histogram · Wykres podaży · Tabela cen
+              </span>
+            </div>
+            <div className="aside-analytics-trigger__arrow" aria-hidden="true">
+              →
+            </div>
+          </button>
         </div>
       )}
 

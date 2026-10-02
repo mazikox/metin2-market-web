@@ -6,7 +6,7 @@ import { Hero } from './components/Hero'
 import { SearchSection } from './components/SearchSection'
 import { ListingItem } from './components/ListingItem'
 import { MarketAside } from './components/MarketAside'
-import { MarketAnalytics } from './components/MarketAnalytics'
+import { AnalyticsDrawer } from './components/AnalyticsDrawer'
 import { Manifesto } from './components/Manifesto'
 import { Footer } from './components/Footer'
 import { ItemDrawer } from './components/ItemDrawer'
@@ -40,6 +40,7 @@ export default function App() {
   const [stat, setStat] = useState<ItemStatistic | null>(null)
   const [familyStats, setFamilyStats] = useState<ItemStatistic[] | null>(null)
   const [statsLoading, setStatsLoading] = useState(false)
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false)
   const [suggestions, setSuggestions] = useState<ItemSuggestion[]>([])
   const [activeDrawerItem, setActiveDrawerItem] = useState<MarketOffer | null>(null)
   const [activeSection, setActiveSection] = useState<ActiveSection>(null)
@@ -273,6 +274,7 @@ export default function App() {
   const isUpgradeFamily = activeSuggestion?.kind === 'UPGRADE_FAMILY' || (vnums.length > 1)
   const maxPage = Math.ceil(totalElements / PAGE_SIZE) - 1
   const closeDrawer = useCallback(() => setActiveDrawerItem(null), [])
+  const closeAnalytics = useCallback(() => setIsAnalyticsOpen(false), [])
 
   return (
     <>
@@ -302,8 +304,6 @@ export default function App() {
 
           <div className="market-layout">
             <div className={`results-pane ${loading ? 'results-pane--loading' : ''}`} aria-busy={loading}>
-              {stat && <MarketAnalytics stat={stat} loading={statsLoading} />}
-
               <div className="toolbar">
                 <div className="filters">
                   <label className="field">
@@ -401,6 +401,7 @@ export default function App() {
               familyStats={familyStats}
               isUpgradeFamily={isUpgradeFamily}
               onSelectLevel={handleSelectLevel}
+              onOpenAnalytics={() => setIsAnalyticsOpen(true)}
             />
           </div>
         </section>
@@ -413,6 +414,12 @@ export default function App() {
       <ItemDrawer
         item={activeDrawerItem}
         onClose={closeDrawer}
+      />
+
+      <AnalyticsDrawer
+        isOpen={isAnalyticsOpen}
+        onClose={closeAnalytics}
+        stat={stat || (familyStats && familyStats[0]) || null}
       />
     </>
   )
