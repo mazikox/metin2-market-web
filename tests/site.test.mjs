@@ -2,7 +2,15 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile, access } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
-import { hasSelectedServer, getSelectedServer, getServerUrl, GAME_SERVERS } from '../src/servers.ts'
+import ts from 'typescript'
+
+const serversSource = await readFile(new URL('../src/servers.ts', import.meta.url), 'utf8')
+const { outputText: serversJs } = ts.transpileModule(serversSource, {
+  compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
+})
+const { hasSelectedServer, getSelectedServer, getServerUrl, GAME_SERVERS } = await import(
+  'data:text/javascript;base64,' + Buffer.from(serversJs).toString('base64')
+)
 
 test.before(() => {
   execFileSync(process.execPath, ['scripts/generate-site.mjs'])
