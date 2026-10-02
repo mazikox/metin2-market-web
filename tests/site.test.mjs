@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile, access } from 'node:fs/promises'
-import { execFileSync } from 'node:child_process'
+import { execFileSync, execSync } from 'node:child_process'
 import ts from 'typescript'
 
 const serversSource = await readFile(new URL('../src/servers.ts', import.meta.url), 'utf8')
@@ -108,6 +108,15 @@ test('server selection helper functions handle known, unknown, and empty server 
 })
 
 test('production build produces pre-rendered server HTML with exactly one canonical and consistent metadata', async () => {
+  try {
+    await access('dist/index.html')
+  } catch {
+    execSync('npm run build', {
+      env: { ...process.env, VITE_API_BASE_URL: '/backend' },
+      stdio: 'pipe',
+    })
+  }
+
   const countOccurrences = (str, regex) => (str.match(regex) || []).length
 
   const indexHtml = await readFile('dist/index.html', 'utf8')
