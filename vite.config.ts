@@ -22,6 +22,10 @@ function escapeHtml(value: string) {
     .replace(/'/g, '&#39;')
 }
 
+function renderServerRoot(server: { id: string; name: string }) {
+  return `<div id="root"><div class="market-shell"><header class="site-header"><div class="shell"><a href="/" class="brand">METIN2 <span>BAZAR</span></a><nav class="server-nav" aria-label="Wybierz rynek"><a href="/?server=pandora"${server.id === 'pandora' ? ' class="active"' : ''}>Pandora</a><a href="/?server=elder"${server.id === 'elder' ? ' class="active"' : ''}>Elder</a><a href="/?server=beavium"${server.id === 'beavium' ? ' class="active"' : ''}>Beavium</a></nav></div></header><main class="shell market-main" id="main-content"><h1>Rynek Metin2 ${escapeHtml(server.name)}</h1><p class="market-lead">Przeglądaj oferty, porównuj ceny i sprawdzaj sklepy na serwerze ${escapeHtml(server.name)}.</p><div class="server-links" aria-label="Rynki"><p>Przełącz rynek:</p><a href="/?server=pandora">Rynek Pandora</a> · <a href="/?server=elder">Rynek Elder</a> · <a href="/?server=beavium">Rynek Beavium</a></div></main></div></div>`
+}
+
 function applyServerMeta(html: string, server: { id: string; name: string }) {
   const title = `Rynek Metin2 ${server.name} | ${site.name}`
   const description = `Porównuj ceny, bonusy i lokalizacje przedmiotów na serwerze ${server.name}. Przeglądaj oferty z opublikowanych skanów rynku Metin2.`
@@ -49,6 +53,7 @@ function applyServerMeta(html: string, server: { id: string; name: string }) {
       /<meta[^>]*property=["']og:url["'][^>]*>/i,
       `<meta property="og:url" content="${escapeHtml(canonical)}" />`,
     )
+    .replace(/<div id="root">[\s\S]*?<\/div><noscript>/, renderServerRoot(server) + '<noscript>')
 }
 
 // Vite's SPA fallback does not resolve directory indexes inside public/.

@@ -153,6 +153,10 @@ test('production build produces pre-rendered server HTML with exactly one canoni
   assert.match(indexHtml, /<link rel="canonical" href="https:\/\/metin2bazar\.pl\/" \/>/)
   assert.match(indexHtml, /<title>Metin2 Bazar \| ceny i oferty z rynków Metin2<\/title>/)
   assert.match(indexHtml, /<meta property="og:url" content="https:\/\/metin2bazar\.pl\/" \/>/)
+  assert.match(indexHtml, /<h1>Wybierz serwer Metin2<\/h1>/, 'index.html contains prerendered H1')
+  assert.match(indexHtml, /href="\/\?server=pandora"/, 'index.html contains link to Pandora')
+  assert.match(indexHtml, /href="\/\?server=elder"/, 'index.html contains link to Elder')
+  assert.match(indexHtml, /href="\/\?server=beavium"/, 'index.html contains link to Beavium')
   assert.doesNotMatch(indexHtml, /<meta[^>]+name=["']robots["'][^>]+content=["']noindex["']/)
 
   const servers = [
@@ -166,6 +170,10 @@ test('production build produces pre-rendered server HTML with exactly one canoni
     assert.match(html, new RegExp(`<link rel="canonical" href="https:\\/\\/metin2bazar\\.pl\\/\\?server=${s.id}" \\/>`))
     assert.match(html, new RegExp(`<title>Rynek Metin2 ${s.name} \\| Metin2 Bazar<\\/title>`))
     assert.match(html, new RegExp(`<meta property="og:url" content="https:\\/\\/metin2bazar\\.pl\\/\\?server=${s.id}" \\/>`))
+    assert.match(html, new RegExp(`<h1>Rynek Metin2 ${s.name}<\\/h1>`), `server-${s.id}.html contains server H1`)
+    assert.match(html, /href="\/\?server=pandora"/, `server-${s.id}.html contains link to Pandora`)
+    assert.match(html, /href="\/\?server=elder"/, `server-${s.id}.html contains link to Elder`)
+    assert.match(html, /href="\/\?server=beavium"/, `server-${s.id}.html contains link to Beavium`)
     assert.match(html, new RegExp(`na serwerze ${s.name}`))
     assert.doesNotMatch(html, /<meta[^>]+name=["']robots["'][^>]+content=["']noindex["']/)
   }
