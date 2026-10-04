@@ -872,6 +872,7 @@ select.custom-select option {
   border: 1px solid var(--line-strong);
   padding: 9px 16px;
   font-size: 11px;
+  line-height: 1;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--ink);
@@ -890,9 +891,10 @@ select.custom-select option {
 }
 
 .open-detail__arrow {
-  display: inline-block;
-  font-size: 13px;
-  line-height: 1;
+  width: 14px;
+  height: 14px;
+  display: block;
+  flex-shrink: 0;
   transition: transform 0.15s ease;
 }
 

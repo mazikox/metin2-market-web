@@ -2,6 +2,7 @@ import type { MarketOffer } from '../types'
 import { formatCompact, formatObservedAt, iconPath, shortMap } from '../format'
 import { getSoulStones } from '../soulStones'
 import { ObjectFrame } from './ObjectFrame'
+import { ArrowRightIcon } from './Icons'
 
 interface ListingItemProps {
   item: MarketOffer
@@ -86,7 +87,7 @@ export function ListingItem({ item, onOpenDetails }: ListingItemProps) {
         onClick={() => onOpenDetails(item)}
       >
         <span>Szczegóły</span>
-        <span className="open-detail__arrow" aria-hidden="true">→</span>
+        <ArrowRightIcon className="open-detail__arrow" />
       </button>
     </article>
   )

@@ -12,6 +12,10 @@ export function ChevronIcon({ direction = 'right', ...props }: Props & { directi
   return <svg viewBox="0 0 24 24" aria-hidden="true" {...props}><path d={direction === 'right' ? 'm9 18 6-6-6-6' : 'm15 18-6-6 6-6'} {...base} /></svg>
 }
 
+export function ArrowRightIcon(props: Props) {
+  return <svg viewBox="0 0 24 24" aria-hidden="true" {...props}><path d="M5 12h14M13 6l6 6-6 6" {...base} /></svg>
+}
+
 export function PackageIcon(props: Props) {
   return <svg viewBox="0 0 24 24" aria-hidden="true" {...props}><path d="m4 7 8-4 8 4-8 4-8-4Z" {...base} /><path d="M4 7v10l8 4 8-4V7M12 11v10" {...base} /></svg>
 }
