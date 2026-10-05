@@ -59,3 +59,8 @@ export function formatCoordinates(
   if (z != null && Number.isFinite(z) && z !== 0) parts.push(Math.round(z))
   return parts.join(', ')
 }
+
+export const marketMapLabel = (mapId: string): string => {
+  const kingdom = ({ metin2_map_a1: 'Shinsoo', metin2_map_a1_summer: 'Shinsoo', metin2_map_b1: 'Chunjo', metin2_map_c1: 'Jinno' } as Record<string, string>)[mapId]
+  return kingdom ? `${kingdom} · ${shortMap(mapId)}` : shortMap(mapId)
+}

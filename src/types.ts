@@ -148,6 +148,7 @@ export interface PopularItem {
 }
 
 export interface MarketOverviewResponse {
+  maps?: { mapId: string; scanId: number; scanEndedAt: string | null; observedShopCount: number }[]
   scanId: number | null
   scanEndedAt: string | null
   observedShopCount: number
@@ -181,3 +182,5 @@ export interface CategoryOptions {
   available: boolean
   categories: { value: string; name: string }[]
 }
+
+export interface MarketMapOption { mapId: string; scanId: number; scanEndedAt: string | null }

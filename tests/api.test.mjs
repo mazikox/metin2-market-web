@@ -267,3 +267,21 @@ test('category and inclusive level bounds combine with bonuses, including level 
     assert.equal(urls.at(-1).pathname, '/api/v1/servers/beavium/items/category-options')
   } finally { globalThis.fetch = previousFetch }
 })
+
+test('map filters are applied server-side to every page and price statistics on all servers', async t => {
+  const previous = globalThis.fetch; t.after(() => { globalThis.fetch = previous })
+  const urls = []
+  globalThis.fetch = async url => { urls.push(new URL(url)); return new Response(JSON.stringify({ items: [] })) }
+  for (const server of ['pandora', 'elder', 'beavium']) {
+    await serverApis[server].offers({ page: 3, size: 8, maps: ['metin2_map_a1', 'metin2_map_c1'], bonuses: [{ type: 11, minimum: 20 }] })
+    await serverApis[server].statistics([180], undefined, ['metin2_map_a1'])
+    await serverApis[server].mapOptions()
+  }
+  for (let i = 0; i < urls.length; i += 3) {
+    assert.deepEqual(urls[i].searchParams.getAll('map'), ['metin2_map_a1', 'metin2_map_c1'])
+    assert.equal(urls[i].searchParams.get('page'), '3')
+    assert.equal(urls[i].searchParams.get('bonus'), '11:20')
+    assert.deepEqual(urls[i + 1].searchParams.getAll('map'), ['metin2_map_a1'])
+    assert.ok(urls[i + 2].pathname.endsWith('/map-options'))
+  }
+})

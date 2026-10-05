@@ -198,3 +198,25 @@ Spring Boot / Java backend responsible for:
 - protected private catalog statistics,
 - Caddy production routing,
 - Docker-based deployment and integration tests.
+
+
+### Map markets and scan administration
+
+`/admin/scans` uses the same production Caddy login as `/admin/stats`. Select a
+server, enable/disable maps and choose automatic newest scan or pin a ready older
+scan. Save applies all changed selections together. History includes pending and
+unpublished scans, which cannot be selected. The API keeps scans and settings
+separate, so new imports cannot re-enable hidden maps or undo pinned selections.
+
+The public page has one expandable **Filtry** panel with tabs for extra bonuses,
+category/required level, and maps. Drafts survive tab changes and the shared apply
+button submits all conditions together. Map filtering covers the whole result in
+SQL, including pagination and price statistics. Options list active maps only;
+empty map selection means all active maps. Base item properties remain outside
+the extra bonus filter. Overview shows the date per active map.
+
+For a local admin preview only, start API with a test `ANALYTICS_PROXY_TOKEN`
+(at least 32 characters) and Vite with matching `DEV_ADMIN_PROXY_TOKEN`.
+This optional proxy header injection only works in serve mode against loopback
+API targets, never in production builds. The value has no `VITE_` prefix and
+is not included in frontend assets. Production continues to require Caddy login.

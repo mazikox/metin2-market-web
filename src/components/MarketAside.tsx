@@ -148,7 +148,7 @@ export function MarketAside({
       <div className="aside-block">
         <h3 className="aside-title">Jak interpretować wyniki</h3>
         <p className="caption">
-          Ceny pochodzą z najnowszego opublikowanego skanu i stanowią ceny wystawienia. Serwis nie gromadzi historii transakcji, a oferta mogła zostać sprzedana.
+          Ceny pochodzą z aktywnych skanów wybranych map i stanowią ceny wystawienia. Serwis nie gromadzi historii transakcji, a oferta mogła zostać sprzedana.
         </p>
       </div>
     </aside>

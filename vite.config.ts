@@ -141,6 +141,10 @@ function informationPages(isProduction: boolean): Plugin {
 export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, '.', '')
   const apiTarget = env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8080'
+  // Explicit local-only preview of Caddy-authenticated admin pages. This value
+  // has no VITE_ prefix and is never exposed to the frontend bundle.
+  const localAdminToken = command === 'serve' && ['127.0.0.1', 'localhost', '[::1]'].includes(new URL(apiTarget).hostname)
+    ? env.DEV_ADMIN_PROXY_TOKEN : undefined
 
   return {
     plugins: [react(), informationPages(command === 'build')],
@@ -151,7 +155,15 @@ export default defineConfig(({ mode, command }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/backend/, ''),
           configure: (proxy) => {
-            proxy.on('proxyReq', (proxyRequest) => proxyRequest.removeHeader('origin'))
+            proxy.on('proxyReq', (proxyRequest, request) => {
+              proxyRequest.removeHeader('origin')
+              proxyRequest.removeHeader('X-Analytics-Admin')
+              proxyRequest.removeHeader('X-Analytics-Proxy-Token')
+              if (localAdminToken && localAdminToken.length >= 32 && request.url?.startsWith('/api/v1/admin/')) {
+                proxyRequest.setHeader('X-Analytics-Admin', 'local-preview')
+                proxyRequest.setHeader('X-Analytics-Proxy-Token', localAdminToken)
+              }
+            })
           },
         },
       },

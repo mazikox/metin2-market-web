@@ -1,4 +1,4 @@
-import type { CategoryOptions, ItemFilters, BonusFilter, BonusOption, OfferSort, MarketOverviewSort, MarketOverviewResponse, OffersResponse, StatisticsResponse, SuggestionsResponse } from './types'
+import type { MarketMapOption, CategoryOptions, ItemFilters, BonusFilter, BonusOption, OfferSort, MarketOverviewSort, MarketOverviewResponse, OffersResponse, StatisticsResponse, SuggestionsResponse } from './types'
 import type { GameServerId } from './servers'
 
 const urlParamApi = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('api') : null
@@ -61,6 +61,9 @@ function createServerApi(server: GameServerId) {
     categoryOptions(signal?: AbortSignal) {
       return request<CategoryOptions>(itemsPath + '/category-options', signal, 8000)
     },
+    mapOptions(signal?: AbortSignal) {
+      return request<MarketMapOption[]>(itemsPath + '/map-options', signal, 8000)
+    },
     bonusOptions(signal?: AbortSignal) {
       return request<BonusOption[]>(itemsPath + '/bonus-options', signal, 8000)
     },
@@ -68,7 +71,7 @@ function createServerApi(server: GameServerId) {
       const params = new URLSearchParams({ query: query.trim() })
       return request<SuggestionsResponse>(itemsPath + '/suggestions?' + params, signal, 4000)
     },
-    offers(options: { query?: string; vnums?: number[]; page: number; size: number; sort?: OfferSort; bonuses?: BonusFilter[]; itemFilters?: ItemFilters; requestId?: string; searchId?: string }, signal?: AbortSignal) {
+    offers(options: { query?: string; vnums?: number[]; page: number; size: number; sort?: OfferSort; bonuses?: BonusFilter[]; itemFilters?: ItemFilters; maps?: string[]; requestId?: string; searchId?: string }, signal?: AbortSignal) {
       const params = new URLSearchParams()
       if (options.query) params.set('query', options.query.trim())
       if (options.vnums?.length) options.vnums.forEach((v) => params.append('vnum', String(v)))
@@ -79,14 +82,16 @@ function createServerApi(server: GameServerId) {
       if (options.itemFilters?.category) params.set('category', options.itemFilters.category)
       if (options.itemFilters?.minLevel != null) params.set('minLevel', String(options.itemFilters.minLevel))
       if (options.itemFilters?.maxLevel != null) params.set('maxLevel', String(options.itemFilters.maxLevel))
+      options.maps?.forEach(map => params.append('map', map))
       const headers: Record<string, string> = {}
       if (options.requestId) headers['X-Catalog-Request'] = options.requestId
       if (options.searchId) headers['X-Catalog-Search'] = options.searchId
       return request<OffersResponse>(itemsPath + '?' + params, signal, 5000, headers)
     },
-    statistics(vnums: number[], signal?: AbortSignal) {
+    statistics(vnums: number[], signal?: AbortSignal, maps?: string[]) {
       const params = new URLSearchParams()
       vnums.forEach((vnum) => params.append('vnum', String(vnum)))
+      maps?.forEach(map => params.append('map', map))
       return request<StatisticsResponse>(itemsPath + '/statistics?' + params, signal, 5000)
     },
   }

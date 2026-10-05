@@ -3,7 +3,7 @@ import { ApiError, serverApis } from '../api'
 import type { GameServerId } from '../servers'
 import type { MarketOverviewResponse, MarketOverviewSort, PopularItem } from '../types'
 import type { ApiStatus } from './Header'
-import { formatNumber, formatYang } from '../format'
+import { formatNumber, formatYang, shortMap } from '../format'
 import { ItemIcon } from './ItemIcon'
 import { ArrowRightIcon, RefreshIcon, StoreIcon } from './Icons'
 
@@ -59,7 +59,7 @@ export function MarketOverview({ serverId, onSelectItem, onStatusChange }: Marke
         {!loading && !error && overview?.scanId != null && (
           <div className="overview-scan">
             <span><StoreIcon /> {formatNumber(overview.observedShopCount)} obserwowanych sklepów</span>
-            {overview.scanEndedAt && <span>Ostatni skan <time dateTime={overview.scanEndedAt}>{formatScanDate(overview.scanEndedAt)}</time></span>}
+            {overview.maps?.length ? overview.maps.map(map => <span key={map.mapId}>{shortMap(map.mapId)}{map.scanEndedAt && <time dateTime={map.scanEndedAt}>{formatScanDate(map.scanEndedAt)}</time>}</span>) : overview.scanEndedAt && <span>Ostatni skan <time dateTime={overview.scanEndedAt}>{formatScanDate(overview.scanEndedAt)}</time></span>}
           </div>
         )}
       </div>
@@ -118,7 +118,7 @@ export function MarketOverview({ serverId, onSelectItem, onStatusChange }: Marke
           ))}
         </div>
       )}
-      {!loading && !error && Boolean(overview?.items.length) && <p className="overview-note">Kolejność według {sort === 'shops' ? 'liczby sklepów' : 'łącznej liczby sztuk'} w ostatnim opublikowanym skanie. Dostępność ofert może się zmieniać.</p>}
+      {!loading && !error && Boolean(overview?.items.length) && <p className="overview-note">Kolejność według {sort === 'shops' ? 'liczby sklepów' : 'łącznej liczby sztuk'} w aktywnych skanach map. Dostępność ofert może się zmieniać.</p>}
       </div>
     </section>
   )
