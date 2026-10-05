@@ -19,11 +19,12 @@ The project is deployed as a real production service rather than a static portfo
 
 ## Product features
 
+- **Market overview** — eight item cards with tabs for unique shop count or total item quantity in the latest published scan, with minimum prices, quantities, scan date, and direct access to offers.
 - **Multi-server marketplace** — separate catalogs for Pandora, Elder, and Beavium.
 - **Fast item search** — API-backed suggestions, exact VNUM families, and debounced requests.
 - **Offer comparison** — unit prices, quantities, bonuses, shop data, channel/map information, and observation timestamps.
 - **Market statistics** — minimum, mean, and median prices with a local fallback when the statistics endpoint is unavailable.
-- **Sorting and filtering** — price, quantity, and map filtering for the currently loaded results.
+- **Sorting and filtering** — price and quantity sorting across all matching offers before pagination; map filtering for the currently loaded page.
 - **Saved searches** — favorites stored locally per server.
 - **Resilient network UX** — request cancellation, timeouts, retry handling, stale-request protection, and user-facing API states.
 - **Responsive and accessible UI** — keyboard-friendly navigation, skip links, semantic labels, and mobile navigation.

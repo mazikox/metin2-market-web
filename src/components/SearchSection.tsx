@@ -11,6 +11,7 @@ interface SearchSectionProps {
   queryVnums: number[]
   suggestions: ItemSuggestion[]
   onSearch: (newQuery: string, vnums?: number[]) => void
+  onOverview: () => void
   onSelectSuggestion: (suggestion: ItemSuggestion) => void
   onQueryChange: (val: string) => void
 }
@@ -29,7 +30,7 @@ const HARD_SERVER_QUICK_SEARCHES: QuickSearchItem[] = [
   { label: 'Rada', query: 'Rada Pustelnika' },
   { label: 'Egzo', query: 'Zwój Egzorcyzmu' },
   { label: 'Kupon SM', query: 'Kupon SM' },
-  { label: 'Ostatni skan', query: '' },
+  { label: 'Przegląd rynku', query: '' },
 ]
 
 const PANDORA_QUICK_SEARCHES: QuickSearchItem[] = [
@@ -37,7 +38,7 @@ const PANDORA_QUICK_SEARCHES: QuickSearchItem[] = [
   { label: 'FMS', query: 'FMS' },
   { label: 'Kamień', query: 'Kamień' },
   { label: 'Naszyjnik', query: 'Naszyjnik' },
-  { label: 'Ostatni skan', query: '' },
+  { label: 'Przegląd rynku', query: '' },
 ]
 
 const QUICK_SEARCHES_BY_SERVER: Record<GameServerId, QuickSearchItem[]> = {
@@ -52,6 +53,7 @@ export function SearchSection({
   queryVnums,
   suggestions,
   onSearch,
+  onOverview,
   onSelectSuggestion,
   onQueryChange,
 }: SearchSectionProps) {
@@ -97,7 +99,8 @@ export function SearchSection({
 
   const handleQuickClick = (q: string) => {
     setOpen(false)
-    onSearch(q)
+    if (!q) onOverview()
+    else onSearch(q)
   }
 
   return (

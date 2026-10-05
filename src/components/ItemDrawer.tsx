@@ -3,6 +3,7 @@ import type { MarketOffer } from '../types'
 import { formatCoordinates, formatFull, formatObservedAt, iconPath, shortMap } from '../format'
 import { getSoulStones } from '../soulStones'
 import { ObjectFrame } from './ObjectFrame'
+import { BaseItemStats } from './BaseItemStats'
 
 interface ItemDrawerProps {
   item: MarketOffer | null
@@ -121,6 +122,8 @@ export function ItemDrawer({ item, onClose }: ItemDrawerProps) {
               <div className="caption">Brak bonusów w danych.</div>
             )}
           </div>
+
+          <BaseItemStats metadata={item.metadata} />
 
           <div className="detail-row">
             <span>Sklep</span>

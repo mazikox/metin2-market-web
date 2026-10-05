@@ -38,6 +38,23 @@ export interface ShopInfo {
   z: number | null
 }
 
+export interface ItemMetadata {
+  vnum: number
+  name: string
+  type: number
+  subtype: number
+  size: number
+  antiFlags: number
+  requiredLevel: number
+  defense: number
+  minAttack: number
+  maxAttack: number
+  minMagicAttack: number
+  maxMagicAttack: number
+  socketCount: number
+  builtInBonuses: ItemAttribute[]
+}
+
 export interface MarketOffer {
   listingId: number
   vnum: number
@@ -52,6 +69,7 @@ export interface MarketOffer {
   sockets: ItemSocket[]
   shop: ShopInfo | null
   observedAt: string
+  metadata?: ItemMetadata | null
 }
 
 export interface OffersResponse {
@@ -119,4 +137,47 @@ export interface ItemStatistic {
 
 export interface StatisticsResponse {
   items: ItemStatistic[]
+}
+
+export interface PopularItem {
+  vnum: number
+  itemName: string
+  shopCount: number
+  totalQuantity: number
+  minimumPrice: number
+}
+
+export interface MarketOverviewResponse {
+  scanId: number | null
+  scanEndedAt: string | null
+  observedShopCount: number
+  items: PopularItem[]
+}
+
+export type MarketOverviewSort = 'shops' | 'quantity'
+
+export type OfferSort = 'priceAsc' | 'priceDesc' | 'quantity'
+
+
+export interface BonusFilter {
+  type: number
+  minimum?: number
+}
+
+export interface BonusOption {
+  type: number
+  code: string
+  name: string
+  unit: string
+}
+
+
+export interface ItemFilters {
+  category?: string
+  minLevel?: number
+  maxLevel?: number
+}
+export interface CategoryOptions {
+  available: boolean
+  categories: { value: string; name: string }[]
 }

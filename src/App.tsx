@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ApiError, serverApis } from './api'
-import type { ItemStatistic, ItemSuggestion, MarketOffer } from './types'
+import type { ItemStatistic, ItemSuggestion, MarketOffer, PopularItem, OfferSort, BonusFilter, ItemFilters } from './types'
 import { Header, type ApiStatus } from './components/Header'
 import { Hero } from './components/Hero'
+import { MarketOverview } from './components/MarketOverview'
 import { SearchSection } from './components/SearchSection'
+import { BonusFilters } from './components/BonusFilters'
+import { CategoryFilters } from './components/CategoryFilters'
 import { ListingItem } from './components/ListingItem'
 import { MarketAside } from './components/MarketAside'
 import { AnalyticsDrawer } from './components/AnalyticsDrawer'
@@ -20,17 +23,21 @@ type ActiveSection = 'market' | 'catalog' | 'about' | null
 export default function App() {
   const server = getSelectedServer()
   const api = serverApis[server.id]
-  const initialQuery = server.id === 'pandora' ? 'Zatruty miecz' : ''
+  const initialQuery = ''
   const [apiStatus, setApiStatus] = useState<ApiStatus>('checking')
   const [query, setQuery] = useState(initialQuery)
   const [inputQuery, setInputQuery] = useState(initialQuery)
-  const [vnums, setVnums] = useState<number[]>(server.id === 'pandora' ? [180, 181, 182, 183, 184, 185, 186, 187, 188, 189] : [])
+  const [vnums, setVnums] = useState<number[]>([])
   const [activeSuggestion, setActiveSuggestion] = useState<ItemSuggestion | null>(null)
   const [page, setPage] = useState(0)
+  const [bonuses, setBonuses] = useState<BonusFilter[]>([])
+  const [itemFilters, setItemFilters] = useState<ItemFilters>({})
+  const hasItemFilters = Boolean(itemFilters.category || itemFilters.minLevel != null || itemFilters.maxLevel != null)
+  const isOverview = !query.trim() && vnums.length === 0 && bonuses.length === 0 && !hasItemFilters
   // Tokens identify only an action/request and live in this mounted component.
   const [searchId, setSearchId] = useState<string>()
-  const requestId = useMemo(() => crypto.randomUUID(), [page, searchId])
-  const [sort, setSort] = useState<'api' | 'priceDesc' | 'quantity'>('api')
+  const [sort, setSort] = useState<OfferSort>('priceAsc')
+  const requestId = useMemo(() => crypto.randomUUID(), [page, searchId, sort, bonuses, itemFilters])
   const [mapFilter, setMapFilter] = useState('')
   const [rawItems, setRawItems] = useState<MarketOffer[]>([])
   const [totalElements, setTotalElements] = useState(0)
@@ -104,7 +111,7 @@ export default function App() {
     }
   }, [])
 
-  // Use the actual offers request as the source of API status.
+  // Use the current market request as the source of API status.
   const loadData = useCallback(async (
     currentQuery: string,
     currentVnums: number[],
@@ -124,6 +131,9 @@ export default function App() {
         vnums: currentVnums,
         page: currentPage,
         size: PAGE_SIZE,
+        sort,
+        bonuses,
+        itemFilters,
         requestId,
         searchId,
       }, signal)
@@ -184,13 +194,23 @@ export default function App() {
     } finally {
       if (!signal.aborted) setLoading(false)
     }
-  }, [api, requestId, searchId])
+  }, [api, requestId, searchId, sort, bonuses, itemFilters])
 
   useEffect(() => {
+    if (isOverview) {
+      setRawItems([])
+      setTotalElements(0)
+      setStat(null)
+      setFamilyStats(null)
+      setLoading(false)
+      setIsAnalyticsOpen(false)
+      setActiveDrawerItem(null)
+      return
+    }
     const controller = new AbortController()
     void loadData(query, vnums, page, controller.signal)
     return () => controller.abort()
-  }, [query, vnums, page, loadData, retryVersion])
+  }, [query, vnums, page, isOverview, loadData, retryVersion])
 
   // Load server suggestions without reusing stale responses or demo data.
   const handleQueryChange = (val: string) => {
@@ -227,6 +247,14 @@ export default function App() {
     setPage(0)
   }
 
+  const handleSelectPopularItem = (item: PopularItem) => {
+    setMapFilter('')
+    setSort('priceAsc')
+    setBonuses([])
+    setItemFilters({})
+    handleSearchSubmit(item.itemName, [item.vnum])
+  }
+
   const handleSelectSuggestion = (s: ItemSuggestion) => {
     setSearchId(crypto.randomUUID())
     if (suggestTimerRef.current) clearTimeout(suggestTimerRef.current)
@@ -252,19 +280,14 @@ export default function App() {
     setPage(0)
   }
 
-  // Filter and sort items
+  // The API sorts all matching offers; the map filter applies to this page.
   const displayedItems = useMemo(() => {
     let list = [...rawItems]
     if (mapFilter) {
       list = list.filter((i) => (i.shop?.mapId || '') === mapFilter)
     }
-    if (sort === 'priceDesc') {
-      list.sort((a, b) => b.unitPrice - a.unitPrice)
-    } else if (sort === 'quantity') {
-      list.sort((a, b) => (b.totalQuantity || b.quantity) - (a.totalQuantity || a.quantity))
-    }
     return list
-  }, [rawItems, mapFilter, sort])
+  }, [rawItems, mapFilter])
 
   // Available map options
   const availableMaps = useMemo(() => {
@@ -282,7 +305,7 @@ export default function App() {
       <Header apiStatus={apiStatus} currentServer={server.id} activeSection={activeSection} />
 
       <main id="main-content" tabIndex={-1}>
-        <Hero serverName={server.name} />
+        <Hero serverName={server.name} compact={isOverview} />
 
         <SearchSection
           serverId={server.id}
@@ -290,16 +313,47 @@ export default function App() {
           queryVnums={inputQuery === query ? vnums : []}
           suggestions={suggestions}
           onSearch={handleSearchSubmit}
+          onOverview={() => { setBonuses([]); setItemFilters({}); handleSearchSubmit('') }}
           onSelectSuggestion={handleSelectSuggestion}
           onQueryChange={handleQueryChange}
         />
 
+        <div className="shell">
+          <CategoryFilters serverId={server.id} filters={itemFilters}
+            onApply={filters => {
+              setItemFilters(filters)
+              setMapFilter('')
+              handleSearchSubmit(inputQuery, inputQuery === query ? vnums : [])
+            }}
+            onClear={() => {
+              setItemFilters({})
+              setMapFilter('')
+              setPage(0)
+              setSearchId(crypto.randomUUID())
+            }} />
+          <BonusFilters serverId={server.id} filters={bonuses}
+            onApply={filters => {
+              setBonuses(filters)
+              setMapFilter('')
+              handleSearchSubmit(inputQuery, inputQuery === query ? vnums : [])
+            }}
+            onClear={() => {
+              setBonuses([])
+              setMapFilter('')
+              setPage(0)
+              setSearchId(crypto.randomUUID())
+            }} />
+        </div>
+
+        {isOverview ? (
+          <MarketOverview serverId={server.id} onSelectItem={handleSelectPopularItem} onStatusChange={setApiStatus} />
+        ) : (
         <section className="shell" id="catalog">
           <div className="section-head">
             <h2 className="section-title">
               Oferty / <span>{query || 'ostatni skan'}</span>
             </h2>
-            <div className="section-note">dane z najnowszego opublikowanego skanu</div>
+            <button type="button" className="market-return" onClick={() => { setBonuses([]); setItemFilters({}); handleSearchSubmit('') }}>← Przegląd rynku</button>
           </div>
 
           <div className="market-layout">
@@ -307,13 +361,16 @@ export default function App() {
               <div className="toolbar">
                 <div className="filters">
                   <label className="field">
-                    Sortowanie tej strony
+                    Sortowanie wszystkich ofert
                     <select
                       className="custom-select"
                       value={sort}
-                      onChange={(e) => setSort(e.target.value as 'api' | 'priceDesc' | 'quantity')}
+                      onChange={(e) => {
+                        setSort(e.target.value as OfferSort)
+                        setPage(0)
+                      }}
                     >
-                      <option value="api">Najtańsze / szt.</option>
+                      <option value="priceAsc">Najtańsze / szt.</option>
                       <option value="priceDesc">Najdroższe / szt.</option>
                       <option value="quantity">Największa ilość</option>
                     </select>
@@ -393,7 +450,7 @@ export default function App() {
             <MarketAside
               selectionTitle={activeSuggestion?.name || query || 'Wszystkie przedmioty'}
               selectionSubtitle={
-                vnums.length > 0
+                (bonuses.length > 0 || hasItemFilters) ? 'Oferty z wybranymi filtrami. Statystyki cen obejmują wszystkie bonusy przedmiotu.' : vnums.length > 0
                   ? `Filtr VNUM: ${vnums.join(', ')}.`
                   : 'Wyniki dopasowane po nazwie przedmiotu.'
               }
@@ -405,6 +462,7 @@ export default function App() {
             />
           </div>
         </section>
+        )}
 
         <Manifesto />
       </main>

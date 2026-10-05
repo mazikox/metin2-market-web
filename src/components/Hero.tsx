@@ -1,8 +1,8 @@
-interface HeroProps { serverName: string }
+interface HeroProps { serverName: string; compact?: boolean }
 
-export function Hero({ serverName }: HeroProps) {
+export function Hero({ serverName, compact = false }: HeroProps) {
   return (
-    <section className="hero">
+    <section className={compact ? 'hero hero--overview' : 'hero'}>
       <div className="shell hero-grid">
         <div>
           <div className="eyebrow">Rynek Metin2 · {serverName} · ostatni opublikowany skan</div>

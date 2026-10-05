@@ -138,3 +138,132 @@ test('unmarked initial API call does not claim a user search', async (t) => {
   assert.equal(headers['X-Catalog-Request'], 'initial-request')
   assert.equal(headers['X-Catalog-Search'], undefined)
 })
+
+
+test('overview requests are server-specific and do not claim a search', async (t) => {
+  const calls = []
+  const payload = { scanId: 7, scanEndedAt: '2026-10-04T16:48:57Z', observedShopCount: 479,
+    items: [{ vnum: 30070, itemName: 'Futro Wilka+', shopCount: 101, totalQuantity: 188, minimumPrice: 999 }] }
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    calls.push({ url, headers: options.headers })
+    return Response.json(payload)
+  })
+  for (const server of ['beavium', 'elder', 'pandora']) {
+    assert.deepEqual(await serverApis[server].overview(), payload)
+  }
+  assert.deepEqual(calls.map(call => call.url), ['beavium', 'elder', 'pandora']
+    .map(server => `https://api.example.test/api/v1/servers/${server}/items/overview?limit=8&sort=shops`))
+  for (const call of calls) {
+    assert.equal(call.headers['X-Catalog-Search'], undefined)
+    assert.equal(call.headers['X-Catalog-Request'], undefined)
+  }
+})
+
+test('leaving overview cancels its pending response body', async (t) => {
+  t.mock.method(globalThis, 'fetch', async (_url, options) => stalledResponse(options.signal))
+  const controller = new AbortController()
+  const request = serverApis.beavium.overview(controller.signal)
+  await setImmediate()
+  controller.abort()
+  await assert.rejects(bounded(request), { name: 'AbortError' })
+  assert.equal(getEventListeners(controller.signal, 'abort').length, 0)
+})
+
+
+test('overview retries reuse their result token without sending a search token', async (t) => {
+  const calls = []
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    calls.push(options.headers)
+    return Response.json({ scanId: null, scanEndedAt: null, observedShopCount: 0, items: [] })
+  })
+  await serverApis.beavium.overview(undefined, 'overview-operation')
+  await serverApis.beavium.overview(undefined, 'overview-operation')
+  assert.equal(calls[0]['X-Catalog-Request'], 'overview-operation')
+  assert.equal(calls[0]['X-Catalog-Search'], undefined)
+  assert.deepEqual(calls[0], calls[1])
+})
+
+
+test('quantity overview requests its own server-side ranking', async (t) => {
+  const calls = []
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    calls.push({ url, headers: options.headers })
+    return Response.json({ items: [] })
+  })
+  await serverApis.beavium.overview(undefined, 'quantity-operation', 'quantity')
+  assert.equal(calls[0].url, 'https://api.example.test/api/v1/servers/beavium/items/overview?limit=8&sort=quantity')
+  assert.equal(calls[0].headers['X-Catalog-Request'], 'quantity-operation')
+  assert.equal(calls[0].headers['X-Catalog-Search'], undefined)
+})
+
+
+test('offer sorting is sent to the API for every server and page', async (t) => {
+  const calls = []
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    calls.push({ url: new URL(url), headers: options.headers })
+    return Response.json({ items: [], totalElements: 0 })
+  })
+  for (const server of ['pandora', 'elder', 'beavium']) {
+    for (const sort of ['priceAsc', 'priceDesc', 'quantity']) {
+      await serverApis[server].offers({ query: 'Medal', vnums: [50050], page: 2, size: 8, sort, requestId: 'sort-request' })
+      const call = calls.at(-1)
+      assert.equal(call.url.pathname, `/api/v1/servers/${server}/items`)
+      assert.equal(call.url.searchParams.get('sort'), sort)
+      assert.equal(call.url.searchParams.get('page'), '2')
+      assert.equal(call.url.searchParams.get('size'), '8')
+      assert.equal(call.url.searchParams.get('query'), 'Medal')
+      assert.equal(call.url.searchParams.get('vnum'), '50050')
+      assert.equal(call.headers['X-Catalog-Search'], undefined)
+    }
+  }
+  await serverApis.beavium.offers(offersOptions)
+  assert.equal(calls.at(-1).url.searchParams.get('sort'), 'priceAsc')
+})
+
+
+test('extra bonus filters and signed minimums are sent on every server without base-stat parameters', async () => {
+  const previousFetch = globalThis.fetch
+  const urls = []
+  globalThis.fetch = async url => {
+    urls.push(new URL(url, 'http://localhost'))
+    return Response.json({ items: [], totalElements: 0 })
+  }
+  try {
+    for (const api of Object.values(serverApis)) {
+      await api.offers({ page: 2, size: 8, sort: 'priceDesc', query: 'Miecz', vnums: [180],
+        bonuses: [{ type: 72, minimum: 40 }, { type: 71, minimum: -25 }, { type: 17 }] })
+    }
+    assert.equal(urls.length, 3)
+    for (const url of urls) {
+      assert.deepEqual(url.searchParams.getAll('bonus'), ['72:40', '71:-25', '17'])
+      assert.equal(url.searchParams.get('page'), '2')
+      assert.equal(url.searchParams.get('vnum'), '180')
+      assert.equal(url.searchParams.get('sort'), 'priceDesc')
+      assert.equal(url.searchParams.has('baseBonus'), false)
+    }
+    await serverApis.beavium.bonusOptions()
+    assert.equal(urls.at(-1).pathname, '/api/v1/servers/beavium/items/bonus-options')
+  } finally { globalThis.fetch = previousFetch }
+})
+
+
+test('category and inclusive level bounds combine with bonuses, including level zero', async () => {
+  const previousFetch = globalThis.fetch
+  const urls = []
+  globalThis.fetch = async url => { urls.push(new URL(url)); return Response.json({ items: [] }) }
+  try {
+    for (const api of Object.values(serverApis)) {
+      await api.offers({ page: 1, size: 8, bonuses: [{ type: 1, minimum: 1000 }],
+        itemFilters: { category: 'necklaces', minLevel: 0, maxLevel: 75 } })
+    }
+    for (const url of urls) {
+      assert.equal(url.searchParams.get('category'), 'necklaces')
+      assert.equal(url.searchParams.get('minLevel'), '0')
+      assert.equal(url.searchParams.get('maxLevel'), '75')
+      assert.deepEqual(url.searchParams.getAll('bonus'), ['1:1000'])
+      assert.equal(url.searchParams.get('page'), '1')
+    }
+    await serverApis.beavium.categoryOptions()
+    assert.equal(urls.at(-1).pathname, '/api/v1/servers/beavium/items/category-options')
+  } finally { globalThis.fetch = previousFetch }
+})
