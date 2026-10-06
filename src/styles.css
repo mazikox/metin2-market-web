@@ -665,13 +665,18 @@ select.custom-select option {
 /* Listings */
 .listing {
   display: grid;
-  grid-template-columns: 76px minmax(200px, 1.4fr) minmax(130px, 0.8fr) minmax(130px, 0.7fr) minmax(90px, auto) auto;
+  grid-template-columns: 76px minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.7fr) max-content max-content;
   gap: 20px;
   align-items: center;
   min-height: 142px;
   padding: 18px 0;
   border-bottom: 1px solid var(--line);
   transition: background 0.15s ease, opacity 0.2s ease;
+}
+
+.listing > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .listing:hover {
@@ -1714,7 +1719,7 @@ footer.site-footer {
 /* ==================== RESPONSIVE BREAKPOINTS ==================== */
 @media (max-width: 1200px) {
   .listing {
-    grid-template-columns: 76px minmax(180px, 1.4fr) minmax(130px, 0.8fr) minmax(130px, 0.7fr) auto;
+    grid-template-columns: 76px minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.7fr) max-content;
     gap: 16px;
   }
   .listing .time {
@@ -1826,7 +1831,7 @@ footer.site-footer {
     flex-direction: column;
   }
   .listing {
-    grid-template-columns: 58px 1fr;
+    grid-template-columns: 58px minmax(0, 1fr);
     gap: 14px;
     min-height: 0;
     padding: 18px 0;

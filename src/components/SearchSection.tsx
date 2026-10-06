@@ -23,7 +23,7 @@ interface QuickSearchItem {
 
 const HARD_SERVER_QUICK_SEARCHES: QuickSearchItem[] = [
   { label: 'FMS', query: 'Miecz Pełni Księżyca' },
-  { label: 'Ostrze Z Czerw. Stali', query: 'Ostrze z Czerwonej Stali' },
+  { label: 'RIB', query: 'Ostrze Z Czerw. Stali' },
   { label: 'Zaczarowanie', query: 'Zaczarowanie Przedmiotu' },
   { label: 'Bodzio', query: 'Zwój Błogosławieństwa' },
   { label: 'Kamień Duchowy', query: 'Kamień Duchowy' },
