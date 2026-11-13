@@ -1,8 +1,8 @@
 # Metin2 Bazar
 
-A production web application for searching and comparing Metin2 marketplace listings across **Pandora**, **Elder**, and **Beavium**.
+**A web application for searching and comparing Metin2 item prices across Pandora, Elder and Beavium.**
 
-**Live:** [metin2bazar.pl](https://metin2bazar.pl) · **Backend:** [mazikox/metin2-market-api](https://github.com/mazikox/metin2-market-api)
+**Live:** [metin2bazar.pl](https://metin2bazar.pl) | **Backend:** [Metin Market API](https://github.com/mazikox/metin2-market-api)
 
 [![Deploy frontend](https://github.com/mazikox/metin2-market-web/actions/workflows/deploy.yml/badge.svg)](https://github.com/mazikox/metin2-market-web/actions/workflows/deploy.yml)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
@@ -11,23 +11,33 @@ A production web application for searching and comparing Metin2 marketplace list
 
 > Independent community project. Not affiliated with Gameforge.
 
-## Why this project
+## The problem
 
-Checking item prices manually across Metin2 shops is slow and makes it difficult to compare offers consistently. Metin2 Bazar turns market scan data into a searchable catalog where players can compare prices, quantities, bonuses, shop locations, and price statistics in one place.
+Metin2 players buy items from individual in-game shops. Prices, quantities and item bonuses vary between sellers, so finding a good offer may require manually visiting hundreds of shops.
 
-The project is deployed as a real production service rather than a static portfolio demo. It includes a separate backend, PostgreSQL persistence, reverse-proxy routing, technical SEO, CI/CD, post-deployment smoke tests, and privacy-conscious usage statistics.
+## The solution
+
+Metin2 Bazar provides a searchable view of imported marketplace observations. Players can compare item prices, quantities, bonuses and shop locations without checking every shop separately.
+
+**Explore the live app:**
+
+1. Open [metin2bazar.pl](https://metin2bazar.pl) and choose a supported server.
+2. Search for an item and review matching offers.
+3. Compare prices, quantities, bonuses and map information, then use the available filters.
+
+The application is deployed on a VPS with a separate Spring Boot API, PostgreSQL persistence, Caddy routing, automated CI/CD and production smoke tests. Listings are observations from imported datasets and may no longer be active in the game.
 
 ## Product features
 
-- **Market overview** — eight item cards with tabs for unique shop count or total item quantity in the latest published scan, with minimum prices, quantities, scan date, and direct access to offers.
-- **Multi-server marketplace** — separate catalogs for Pandora, Elder, and Beavium.
-- **Fast item search** — API-backed suggestions, exact VNUM families, and debounced requests.
-- **Offer comparison** — unit prices, quantities, bonuses, shop data, channel/map information, and observation timestamps.
-- **Market statistics** — minimum, mean, and median prices with a local fallback when the statistics endpoint is unavailable.
-- **Sorting and filtering** — price and quantity sorting across all matching offers before pagination; map filtering for the currently loaded page.
-- **Saved searches** — favorites stored locally per server.
-- **Resilient network UX** — request cancellation, timeouts, retry handling, stale-request protection, and user-facing API states.
-- **Responsive and accessible UI** — keyboard-friendly navigation, skip links, semantic labels, and mobile navigation.
+- **Market overview**  -  eight item cards with tabs for unique shop count or total item quantity in the latest published scan, with minimum prices, quantities, scan date, and direct access to offers.
+- **Multi-server marketplace**  -  separate catalogs for Pandora, Elder, and Beavium.
+- **Fast item search**  -  API-backed suggestions, exact VNUM families, and debounced requests.
+- **Offer comparison**  -  unit prices, quantities, bonuses, shop data, channel/map information, and observation timestamps.
+- **Market statistics**  -  minimum, mean, and median prices with a local fallback when the statistics endpoint is unavailable.
+- **Sorting and filtering**  -  price and quantity sorting across all matching offers before pagination; map filtering for the currently loaded page.
+- **Saved searches**  -  favorites stored locally per server.
+- **Resilient network UX**  -  request cancellation, timeouts, retry handling, stale-request protection, and user-facing API states.
+- **Responsive and accessible UI**  -  keyboard-friendly navigation, skip links, semantic labels, and mobile navigation.
 
 ## Engineering highlights
 
@@ -73,7 +83,7 @@ Catalog usage statistics are collected without third-party analytics scripts, ad
 
 ```mermaid
 flowchart LR
-    Scanner["Market scanners"] -->|authenticated imports| API["Spring Boot API"]
+    Imports["Authenticated batch imports"] -->|data| API["Spring Boot API"]
     API --> DB[("PostgreSQL")]
     Browser["Browser"] -->|static app| Caddy["Caddy"]
     Browser -->|/backend/api/...| Caddy
@@ -191,7 +201,7 @@ The backend keeps server data isolated and exposes server-specific search, sugge
 
 Spring Boot / Java backend responsible for:
 
-- authenticated market-scan imports,
+- authenticated batch imports,
 - server-specific search APIs,
 - price statistics,
 - PostgreSQL persistence and Flyway migrations,
